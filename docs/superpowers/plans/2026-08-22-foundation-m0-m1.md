@@ -1978,6 +1978,17 @@ mod tests {
     }
 
     #[test]
+    fn nested_markers_are_removed_to_a_fixpoint() {
+        let plain = "//data01-cdn.11cdn.org/fi2lm/x/7f_A.s01e01.mp4";
+        let body = STANDARD.encode(plain);
+        let m = MarkerSet::default();
+        let (m0, m1) = (&m.markers()[0], &m.markers()[1]);
+        // marker 1 spliced inside marker 0: a single removal pass would re-form marker 0
+        let token = format!("#2{}{}{}{}{}", &body[..10], &m0[..4], m1, &m0[4..], &body[10..]);
+        assert_eq!(decode_token(&token, &m).unwrap().as_str(), format!("https:{plain}"));
+    }
+
+    #[test]
     fn generic_fallback_strips_unknown_marker() {
         let body = STANDARD.encode("//data01-cdn.11cdn.org/fi2lm/x/7f_A.s01e01.mp4");
         let unknown = format!("//{}", STANDARD.encode("zzzz")); // "//enp6eg=="
@@ -2063,7 +2074,8 @@ pub fn decode_token(token: &str, markers: &MarkerSet) -> std::result::Result<Url
     let bytes = match b64(&cleaned) {
         Ok(b) => b,
         Err(_) => {
-            let generic = GENERIC_MARKER.replace_all(body, "");
+            // Unknown marker shape: strip generic `//…=` runs from the already-cleaned body and retry once.
+            let generic = GENERIC_MARKER.replace_all(&cleaned, "");
             b64(&generic).map_err(|_| DecodeError::Base64 { token: token.to_string() })?
         }
     };
