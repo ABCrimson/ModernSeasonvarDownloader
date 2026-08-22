@@ -1,5 +1,6 @@
 //! Tauri layer: commands + events over `seasonvar_core`, typed bindings via tauri-specta.
 use serde::{Deserialize, Serialize};
+#[cfg(debug_assertions)]
 use specta_typescript::Typescript;
 use tauri::Manager;
 use tauri_specta::{Builder, Event, collect_commands, collect_events};
