@@ -1,0 +1,20 @@
+[package]
+name = "seasonvar-cli"
+description = "Command-line front end for Seasonvar Downloader"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[[bin]]
+name = "seasonvar"
+path = "src/main.rs"
+
+[dependencies]
+seasonvar-core.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
