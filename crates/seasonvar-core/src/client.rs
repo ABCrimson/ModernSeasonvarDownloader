@@ -16,7 +16,9 @@ use crate::source::SITE;
 pub const DEFAULT_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36";
 
 /// Proxy selection. Serialized as a string: `none` | `system` | `http://host:port` | `socks5://host:port`.
-#[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
+///
+/// `Debug` never prints proxy credentials: `Http`/`Socks5` show only `scheme://host[:port]/`.
+#[derive(Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(try_from = "String", into = "String")]
 pub enum Proxy {
     None,
@@ -24,6 +26,35 @@ pub enum Proxy {
     System,
     Http(Url),
     Socks5(Url),
+}
+
+/// `scheme://host[:port]/` — the proxy URL with userinfo, path and query removed (for logs/Debug).
+struct RedactedUrl<'a>(&'a Url);
+
+impl fmt::Debug for RedactedUrl<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}://{}",
+            self.0.scheme(),
+            self.0.host_str().unwrap_or("")
+        )?;
+        if let Some(port) = self.0.port() {
+            write!(f, ":{port}")?;
+        }
+        f.write_str("/")
+    }
+}
+
+impl fmt::Debug for Proxy {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Proxy::None => f.write_str("None"),
+            Proxy::System => f.write_str("System"),
+            Proxy::Http(u) => f.debug_tuple("Http").field(&RedactedUrl(u)).finish(),
+            Proxy::Socks5(u) => f.debug_tuple("Socks5").field(&RedactedUrl(u)).finish(),
+        }
+    }
 }
 
 impl fmt::Display for Proxy {
@@ -130,11 +161,13 @@ impl Client {
     }
 
     /// Resolve a site path (absolute like `/playls2/…` or relative) against `base_url`.
-    pub fn url(&self, path: &str) -> Url {
+    /// A path that does not join (an absolute URL with a bad port, for instance) is a
+    /// [`CoreError::Protocol`] — the path came from the site, not the user.
+    pub fn url(&self, path: &str) -> Result<Url> {
         self.config
             .base_url
             .join(path)
-            .expect("path joins onto base_url")
+            .map_err(|e| CoreError::Protocol(format!("invalid site path `{path}`: {e}")))
     }
 
     pub async fn get_text(&self, url: Url) -> Result<String> {

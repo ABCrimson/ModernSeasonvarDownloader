@@ -33,7 +33,7 @@ async fn retries_5xx_then_succeeds() {
         .mount(&server)
         .await;
     let c = client_for(&server, 3);
-    let body = c.get_text(c.url("/flaky")).await.unwrap();
+    let body = c.get_text(c.url("/flaky").unwrap()).await.unwrap();
     assert_eq!(body, "ok");
 }
 
@@ -47,7 +47,7 @@ async fn does_not_retry_4xx() {
         .mount(&server)
         .await;
     let c = client_for(&server, 3);
-    let err = c.get_text(c.url("/missing")).await.unwrap_err();
+    let err = c.get_text(c.url("/missing").unwrap()).await.unwrap_err();
     assert!(
         matches!(err, CoreError::Http { status: 404, .. }),
         "{err:?}"
@@ -64,7 +64,7 @@ async fn gives_up_after_configured_retries() {
         .mount(&server)
         .await;
     let c = client_for(&server, 2);
-    let err = c.get_text(c.url("/down")).await.unwrap_err();
+    let err = c.get_text(c.url("/down").unwrap()).await.unwrap_err();
     assert!(
         matches!(err, CoreError::Http { status: 502, .. }),
         "{err:?}"
@@ -89,14 +89,49 @@ fn proxy_round_trips_as_string() {
 }
 
 #[test]
+fn proxy_debug_never_prints_credentials() {
+    let p: Proxy = "http://user:secret@h:8080".parse().unwrap();
+    let dbg = format!("{p:?}");
+    assert!(!dbg.contains("user") && !dbg.contains("secret"), "{dbg}");
+    assert!(dbg.contains("h:8080"), "{dbg}");
+    assert_eq!(dbg, "Http(http://h:8080/)");
+    assert_eq!(
+        format!(
+            "{:?}",
+            "socks5://u:p@127.0.0.1:9050/".parse::<Proxy>().unwrap()
+        ),
+        "Socks5(socks5://127.0.0.1:9050/)"
+    );
+    assert_eq!(format!("{:?}", Proxy::None), "None");
+    assert_eq!(format!("{:?}", Proxy::System), "System");
+    // The config embeds the redacted form as well.
+    let cfg = ClientConfig {
+        proxy: p,
+        ..ClientConfig::default()
+    };
+    let cfg_dbg = format!("{cfg:?}");
+    assert!(!cfg_dbg.contains("secret"), "{cfg_dbg}");
+}
+
+#[test]
 fn url_joins_site_paths() {
     let c = Client::new(ClientConfig::default()).unwrap();
     assert_eq!(
-        c.url("/playls2/m/trans/1/plist.txt?time=1").as_str(),
+        c.url("/playls2/m/trans/1/plist.txt?time=1")
+            .unwrap()
+            .as_str(),
         "https://seasonvar.ru/playls2/m/trans/1/plist.txt?time=1"
     );
     assert_eq!(
-        c.url("autocomplete.php").as_str(),
+        c.url("autocomplete.php").unwrap().as_str(),
         "https://seasonvar.ru/autocomplete.php"
     );
+}
+
+#[test]
+fn url_rejects_paths_that_do_not_join() {
+    let c = Client::new(ClientConfig::default()).unwrap();
+    let err = c.url("http://h:abc/x").unwrap_err();
+    assert!(matches!(err, CoreError::Protocol(_)), "{err:?}");
+    assert!(err.to_string().contains("invalid site path"), "{err}");
 }

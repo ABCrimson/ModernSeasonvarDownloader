@@ -4,8 +4,12 @@ use std::sync::LazyLock;
 
 use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
+use url::Url;
 
-/// A file-name template with `{token}` / `{token:0N}` placeholders and `/` path separators.
+use crate::model::{Episode, Serial, Translation};
+
+/// A file-name template with `{token}` / `{token:0N}` placeholders and `/` path separators
+/// (a `\` in the template text is accepted as a separator too).
 ///
 /// Tokens: `show`, `show_ru`, `show_en`, `season`, `episode`, `title`, `translation`, `quality`,
 /// `id`, `ext`. Width grammar: `:0N` with a single digit `N` zero-pads the numeric tokens
@@ -52,6 +56,43 @@ pub struct NameContext {
     pub ext: String,
 }
 
+impl NameContext {
+    /// Build the naming context for one episode of a serial. `episode` falls back to the ordinal when the
+    /// site gave no number; `season` falls back to 1 (a first season carries no suffix on the site).
+    /// `ext` is the media URL's extension (last path segment after its last `.`, lowercase, 1–5 chars),
+    /// else `mp4`.
+    pub fn for_episode(
+        serial: &Serial,
+        translation: &Translation,
+        episode: &Episode,
+        english_first: bool,
+    ) -> NameContext {
+        NameContext {
+            show: serial.title.preferred(english_first).to_string(),
+            show_ru: serial.title.ru.clone(),
+            show_en: serial.title.en.clone(),
+            season: Some(serial.season_number.unwrap_or(1)),
+            episode: Some(episode.number.unwrap_or(episode.ordinal)),
+            title: episode.title.clone(),
+            translation: translation.name.clone(),
+            quality: episode.quality.clone(),
+            id: serial.id,
+            ext: media_ext(&episode.media_url),
+        }
+    }
+}
+
+/// Extension of the URL's last path segment (text after its last `.`, lowercased) when it is 1–5
+/// characters long; `mp4` otherwise.
+fn media_ext(url: &Url) -> String {
+    url.path_segments()
+        .and_then(|mut segments| segments.next_back())
+        .and_then(|last| last.rsplit_once('.'))
+        .map(|(_, ext)| ext.to_lowercase())
+        .filter(|ext| (1..=5).contains(&ext.chars().count()))
+        .unwrap_or_else(|| "mp4".to_string())
+}
+
 /// Which file-system rules to sanitize for.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TargetOs {
@@ -91,8 +132,10 @@ fn num(n: Option<u32>, width: Option<usize>) -> String {
 }
 
 /// Render a template to a relative path; every `/`-separated segment is sanitized for `os`.
+/// A `\` in the template text counts as a separator too (token values are cleaned of both).
 pub fn render_name(template: &Template, ctx: &NameContext, os: TargetOs) -> PathBuf {
-    let rendered = TOKEN.replace_all(template.as_str(), |c: &Captures| {
+    let template = template.as_str().replace('\\', "/");
+    let rendered = TOKEN.replace_all(&template, |c: &Captures| {
         let width = c.get(2).and_then(|w| w.as_str().parse::<usize>().ok());
         let value = match &c[1] {
             "show" => ctx.show.clone(),
@@ -281,6 +324,91 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[test]
+    fn backslash_in_template_is_a_separator() {
+        let slashes = render_name(
+            &Template::new("{show}/Season {season:02}/x.mp4"),
+            &ctx(),
+            TargetOs::Unix,
+        );
+        let backslashes = render_name(
+            &Template::new("{show}\\Season {season:02}\\x.mp4"),
+            &ctx(),
+            TargetOs::Unix,
+        );
+        assert_eq!(backslashes, slashes);
+        assert_eq!(
+            backslashes.to_string_lossy().replace('\\', "/"),
+            "Star Trek Strange New Worlds/Season 04/x.mp4"
+        );
+    }
+
+    #[test]
+    fn for_episode_fills_every_field_from_the_models() {
+        use crate::model::{Episode, Serial, Title, Translation};
+        let mut serial = Serial::minimal(46176, "/x".into());
+        serial.title = Title {
+            ru: "Звездный путь".into(),
+            en: Some("Star Trek".into()),
+        };
+        serial.season_number = Some(4);
+        let translation = Translation {
+            id: 2,
+            name: "LostFilm".into(),
+            playlist_path: "/x".into(),
+            share_percent: None,
+        };
+        let episode = Episode {
+            ordinal: 7,
+            number: None,
+            title: "7 серия SD/FullHD LostFilm".into(),
+            quality: Some("SD/FullHD".into()),
+            translator: Some("LostFilm".into()),
+            token: "#2x".into(),
+            media_url: Url::parse("https://data01-cdn.11cdn.org/fi2lm/x/7f_A.s04e07.mp4").unwrap(),
+            subtitles: Vec::new(),
+            galabel: None,
+            site_id: None,
+            vars: None,
+        };
+        let en = NameContext::for_episode(&serial, &translation, &episode, true);
+        assert_eq!(en.show, "Star Trek");
+        assert_eq!(en.show_ru, "Звездный путь");
+        assert_eq!(en.show_en.as_deref(), Some("Star Trek"));
+        assert_eq!(en.season, Some(4));
+        assert_eq!(
+            en.episode,
+            Some(7),
+            "ordinal stands in for a missing number"
+        );
+        assert_eq!(en.ext, "mp4");
+        assert_eq!(en.translation, "LostFilm");
+        assert_eq!(en.quality.as_deref(), Some("SD/FullHD"));
+        assert_eq!(en.id, 46176);
+        assert_eq!(en.title, "7 серия SD/FullHD LostFilm");
+        let ru = NameContext::for_episode(&serial, &translation, &episode, false);
+        assert_eq!(ru.show, "Звездный путь");
+
+        serial.season_number = None;
+        let first = NameContext::for_episode(&serial, &translation, &episode, true);
+        assert_eq!(
+            first.season,
+            Some(1),
+            "no season suffix on the site means season 1"
+        );
+    }
+
+    #[test]
+    fn media_ext_falls_back_to_mp4() {
+        let ext = |u: &str| media_ext(&Url::parse(u).unwrap());
+        assert_eq!(ext("https://h/a/b.MKV"), "mkv");
+        assert_eq!(ext("https://h/a/b.mp4?x=1"), "mp4");
+        assert_eq!(ext("https://h/a/noext"), "mp4");
+        assert_eq!(ext("https://h/a/b.toolongext"), "mp4");
+        assert_eq!(ext("https://h/a/b."), "mp4");
+        assert_eq!(ext("https://h/"), "mp4");
     }
 
     #[test]

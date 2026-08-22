@@ -1,6 +1,7 @@
 //! Render episodes as copyable links or download scripts (parity with the original's script screen, plus M3U/JSON).
 use std::collections::BTreeSet;
 use std::fmt::Write as _;
+use std::path::{Component, Path};
 use std::str::FromStr;
 use std::sync::LazyLock;
 
@@ -12,7 +13,7 @@ use crate::model::Episode;
 
 /// `"$OUT"`, `${OUT}` or bare `$OUT` in a custom command; bare `$OUT` only when the next character is
 /// not `[A-Za-z0-9_]`, so `$OUTPUT` is left alone.
-static OUT_TOKEN: LazyLock<Regex> =
+static OUT_PLACEHOLDER: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r#""\$OUT"|\$\{OUT\}|\$OUT(?-u:\b)"#).expect("valid regex"));
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -49,8 +50,25 @@ impl FromStr for Format {
 #[cfg_attr(feature = "specta", derive(specta::Type))]
 pub struct ExportItem {
     pub episode: Episode,
-    /// Relative target path rendered from the naming template.
+    /// Relative target path rendered from the naming template, `/`-separated on every OS.
     pub file_name: String,
+}
+
+impl ExportItem {
+    /// Pair an episode with the path [`render_name`](crate::naming::render_name) produced.
+    /// `file_name` is the path's `Normal` components joined with `/` — root, prefix and `.`/`..`
+    /// components are dropped — so the rendered scripts read the same on every OS.
+    pub fn new(episode: Episode, path: &Path) -> Self {
+        let file_name = path
+            .components()
+            .filter_map(|c| match c {
+                Component::Normal(s) => Some(s.to_string_lossy().into_owned()),
+                _ => None,
+            })
+            .collect::<Vec<_>>()
+            .join("/");
+        ExportItem { episode, file_name }
+    }
 }
 
 #[derive(Serialize)]
@@ -133,7 +151,7 @@ pub fn render_export(items: &[ExportItem], format: &Format) -> String {
                 // `$OUT` (bare, `${OUT}` or already double-quoted) becomes the safely quoted file name
                 // in a single pass, so a `$OUT` inside the file name itself is never re-substituted.
                 let name = sh_quote(&i.file_name);
-                let with_out = OUT_TOKEN.replace_all(cmd, NoExpand(name.as_str()));
+                let with_out = OUT_PLACEHOLDER.replace_all(cmd, NoExpand(name.as_str()));
                 let _ = writeln!(out, "{with_out} {}", sh_quote(i.episode.media_url.as_str()));
             }
         }
@@ -166,4 +184,44 @@ pub fn render_export(items: &[ExportItem], format: &Format) -> String {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::ExportItem;
+    use crate::model::Episode;
+
+    fn episode() -> Episode {
+        Episode {
+            ordinal: 1,
+            number: Some(1),
+            title: "1 серия".into(),
+            quality: None,
+            translator: None,
+            token: "#2x".into(),
+            media_url: url::Url::parse("https://h/x.mp4").unwrap(),
+            subtitles: Vec::new(),
+            galabel: None,
+            site_id: None,
+            vars: None,
+        }
+    }
+
+    #[test]
+    fn new_joins_path_components_with_forward_slashes() {
+        let path = PathBuf::from_iter(["Show", "Season 01", "x.mp4"]);
+        let item = ExportItem::new(episode(), &path);
+        assert_eq!(item.file_name, "Show/Season 01/x.mp4");
+        assert_eq!(item.episode.ordinal, 1);
+    }
+
+    #[test]
+    fn new_drops_root_and_dot_components() {
+        let parent = PathBuf::from_iter(["..", "Show", "x.mp4"]);
+        assert_eq!(ExportItem::new(episode(), &parent).file_name, "Show/x.mp4");
+        let rooted = PathBuf::from_iter(["/", "Show", ".", "x.mp4"]);
+        assert_eq!(ExportItem::new(episode(), &rooted).file_name, "Show/x.mp4");
+    }
 }

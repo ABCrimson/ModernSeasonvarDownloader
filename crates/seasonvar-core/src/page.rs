@@ -116,6 +116,23 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
         }
     }
 
+    // `og:title` is the fallback only when the `h1` is missing or blank.
+    let raw_title = doc
+        .select(&sel("h1.pgs-sinfo-title"))
+        .next()
+        .map(|h| h.text().collect::<String>())
+        .filter(|t| !t.trim().is_empty())
+        .or_else(|| meta(&doc, r#"meta[property="og:title"]"#))
+        .unwrap_or_default();
+    // A 200 that is not a serial page (block page, landing page, …) carries none of the three;
+    // a partial serial page (any one of them present) still parses.
+    if secure_mark.is_none() && paths.is_empty() && raw_title.trim().is_empty() {
+        return Err(CoreError::Protocol(
+            "not a seasonvar serial page (no player data or title found)".into(),
+        ));
+    }
+    let (title, season_number) = parse_title(&raw_title);
+
     let mut translations: Vec<Translation> = doc
         .select(&sel("ul.pgs-trans li[data-translate]"))
         .filter_map(|li| {
@@ -151,16 +168,6 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
         translations.push(Translation::default_for(path));
     }
 
-    // `og:title` is the fallback only when the `h1` is missing or blank.
-    let raw_title = doc
-        .select(&sel("h1.pgs-sinfo-title"))
-        .next()
-        .map(|h| h.text().collect::<String>())
-        .filter(|t| !t.trim().is_empty())
-        .or_else(|| meta(&doc, r#"meta[property="og:title"]"#))
-        .unwrap_or_default();
-    let (title, season_number) = parse_title(&raw_title);
-
     // Seasons: the page lists them as `<h2><a href="/serial-…">label <span>note</span></a></h2>` rows
     // inside `.pgs-seaslist ul.tabs-result li` (all rows share one `li.act` on the recorded pages,
     // with the current season's anchor prefixed by ` >>> `). Current = `li.act` or id match;
@@ -182,7 +189,9 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
             else {
                 continue;
             };
-            let url = canonical.join(href).unwrap_or_else(|_| canonical.clone());
+            let Ok(url) = canonical.join(href) else {
+                continue;
+            };
             let label = own_text(&a).trim_start_matches('>').trim().to_string();
             let note = a
                 .select(&span_sel)
@@ -242,7 +251,7 @@ impl Client {
         match src {
             Source::Id(id) => Ok(Serial::minimal(*id, default_playlist_path(ZERO_MARK, *id))),
             Source::Url(serial_url) => {
-                let url = self.url(&serial_url.path());
+                let url = self.url(&serial_url.path())?;
                 let html = match self.get_text(url).await {
                     Ok(h) => h,
                     Err(CoreError::Http { status: 404, .. }) => {

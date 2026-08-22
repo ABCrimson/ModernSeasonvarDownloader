@@ -73,7 +73,7 @@ impl Client {
     /// `GET /autocomplete.php?query=<query>` (trimmed) → search hits, parsed by [`parse_autocomplete`]
     /// against the client's base URL.
     pub async fn autocomplete(&self, query: &str) -> Result<Vec<SearchHit>> {
-        let mut url = self.url("/autocomplete.php");
+        let mut url = self.url("/autocomplete.php")?;
         url.query_pairs_mut().append_pair("query", query.trim());
         let body = self.get_text(url).await?;
         parse_autocomplete(&body, &self.config().base_url)

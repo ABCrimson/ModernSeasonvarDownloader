@@ -60,12 +60,14 @@ async fn full_pipeline_over_recorded_site() {
     );
 }
 
-/// Opt-in live smoke test: `SEASONVAR_LIVE=1 cargo test -p seasonvar-core --test pipeline live_smoke -- --ignored`
+/// Opt-in live smoke test against the real site and CDN (`#[ignore]`d; nightly CI runs it):
+/// `SEASONVAR_LIVE=1 cargo test -p seasonvar-core --test pipeline live_smoke -- --ignored`.
+/// Running it with `--ignored` but without `SEASONVAR_LIVE=1` fails loudly rather than passing vacuously.
 #[tokio::test]
 #[ignore]
 async fn live_smoke() {
     if std::env::var("SEASONVAR_LIVE").is_err() {
-        return;
+        panic!("SEASONVAR_LIVE=1 is required for the live smoke test");
     }
     let c = Client::new(ClientConfig::default()).unwrap();
     let serial = c

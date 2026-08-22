@@ -127,7 +127,7 @@ impl Client {
         serial: &Serial,
         translation: &Translation,
     ) -> Result<Playlist> {
-        let mut url = self.url(&translation.playlist_path);
+        let mut url = self.url(&translation.playlist_path)?;
         if !url.query().is_some_and(|q| q.contains("time=")) {
             let now = jiff::Timestamp::now().as_second();
             url.query_pairs_mut().append_pair("time", &now.to_string());

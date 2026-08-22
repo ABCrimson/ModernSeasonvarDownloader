@@ -47,23 +47,33 @@ pub fn serial_fixtures() -> Vec<(String, String)> {
     v
 }
 
+use seasonvar_core::{SerialUrl, Source};
 use wiremock::matchers::{method, path};
 use wiremock::{Mock, MockServer, ResponseTemplate};
 
-/// Serve every recorded serial page (at its canonical path) and every playlist (at the path its page advertises).
-pub async fn mount_site(server: &MockServer) {
-    let canonical = regex::Regex::new(
+/// The recorded pages carry their own canonical URL (`<link rel="canonical">` or `og:url`);
+/// derive the `SerialUrl` from it the way a user's pasted URL would be parsed.
+pub fn serial_url_of(html: &str) -> SerialUrl {
+    let re = regex::Regex::new(
         r#"<link rel="canonical" href="([^"]+)"|<meta property="og:url" content="([^"]+)""#,
     )
     .unwrap();
+    let caps = re.captures(html).expect("fixture has canonical/og:url");
+    let href = caps.get(1).or(caps.get(2)).unwrap().as_str();
+    match Source::parse(href).expect("canonical url parses") {
+        Source::Url(u) => u,
+        Source::Id(_) => unreachable!("a canonical serial URL is never a bare id"),
+    }
+}
+
+/// Serve every recorded serial page (at its canonical path) and every playlist (at the path its page advertises).
+pub async fn mount_site(server: &MockServer) {
     let pl = regex::Regex::new(r#"(?:var\s+pl\s*=\s*\{\s*'0'\s*:\s*|pl\[(\d+)\]\s*=\s*)"([^"?]+)"#)
         .unwrap();
     for (name, html) in serial_fixtures() {
-        let caps = canonical.captures(&html).expect("canonical");
-        let href = caps.get(1).or(caps.get(2)).unwrap().as_str();
-        let page_path = href.trim_start_matches("https://seasonvar.ru").to_string();
+        let page_path = serial_url_of(&html).path();
         Mock::given(method("GET"))
-            .and(path(page_path.clone()))
+            .and(path(page_path))
             .respond_with(
                 ResponseTemplate::new(200).set_body_raw(html.clone(), "text/html; charset=utf-8"),
             )

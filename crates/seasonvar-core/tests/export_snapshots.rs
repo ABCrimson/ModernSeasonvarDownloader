@@ -66,7 +66,7 @@ fn format_aliases_are_case_insensitive() {
 }
 
 #[test]
-fn custom_substitutes_out_token_forms_once_and_leaves_lookalikes() {
+fn custom_substitutes_out_placeholder_forms_once_and_leaves_lookalikes() {
     let it = items();
     let name = "\"Extraktory/Season 02/Extraktory S02E01 [RuDub].mp4\"";
     let url = it[0].episode.media_url.as_str();
