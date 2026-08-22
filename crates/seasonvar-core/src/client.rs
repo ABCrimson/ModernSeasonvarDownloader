@@ -256,6 +256,7 @@ impl Client {
             .http
             .get(url.clone())
             .header(header::ACCEPT, "*/*")
+            .header(header::ACCEPT_ENCODING, "identity")
             .header(header::RANGE, "bytes=0-0")
             .send()
             .await?;
@@ -295,7 +296,12 @@ impl Client {
         range: Option<(u64, Option<u64>)>,
         read_timeout: Duration,
     ) -> Result<ByteStream> {
-        let mut req = self.cdn.get(url.clone()).header(header::ACCEPT, "*/*");
+        // `identity`: a transparently decompressed body would desync Range offsets vs bytes on disk.
+        let mut req = self
+            .cdn
+            .get(url.clone())
+            .header(header::ACCEPT, "*/*")
+            .header(header::ACCEPT_ENCODING, "identity");
         if let Some((start, end)) = range {
             let value = match end {
                 Some(e) => format!("bytes={start}-{e}"),
@@ -324,7 +330,8 @@ impl Client {
         let timed = futures::stream::unfold(Some(chunks), move |state| async move {
             let mut chunks = state?;
             match tokio::time::timeout(read_timeout, chunks.next()).await {
-                Ok(Some(item)) => Some((item, Some(chunks))),
+                Ok(Some(Ok(chunk))) => Some((Ok(chunk), Some(chunks))),
+                Ok(Some(Err(e))) => Some((Err(e), None)),
                 Ok(None) => None,
                 Err(_) => Some((Err(stalled(read_timeout)), None)),
             }
@@ -373,7 +380,8 @@ fn stalled(read_timeout: Duration) -> CoreError {
     CoreError::Timeout(format!("no data received for {read_timeout:?}"))
 }
 
-fn is_retryable(err: &CoreError) -> bool {
+/// Transient failures worth another attempt: network errors, stalls, 429 and 5xx — never 4xx.
+pub(crate) fn is_retryable(err: &CoreError) -> bool {
     match err {
         CoreError::Http { status, .. } => *status == 429 || *status >= 500,
         CoreError::Network(e) => !e.is_builder() && !e.is_redirect(),

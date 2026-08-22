@@ -71,7 +71,7 @@ pub struct Engine {
     pub retries: u8,
 }
 
-/// `[network]` — proxy, timeout and user agent for every request.
+/// `[network]` — proxy, timeout and user agent for the HTTP client.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(default)]
@@ -79,6 +79,7 @@ pub struct Network {
     /// `none` | `system` | `http://host:port` | `socks5://host:port` (string wire shape; see ADR-0005 / Plan 1 review).
     #[cfg_attr(feature = "specta", specta(type = String))]
     pub proxy: Proxy,
+    /// Total deadline for site requests and the CDN probe; stream bodies are bounded per chunk by the engine's read timeout.
     pub timeout_secs: u64,
     pub user_agent: String,
 }

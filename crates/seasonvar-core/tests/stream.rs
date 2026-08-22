@@ -7,6 +7,19 @@ use seasonvar_core::{Client, ClientConfig, CoreError, Proxy};
 use url::Url;
 use wiremock::MockServer;
 
+/// Every CDN request must ask for `identity` — a decompressed body would desync Range offsets.
+async fn assert_identity_encoding(server: &MockServer) {
+    let seen = server.received_requests().await.unwrap();
+    assert!(!seen.is_empty());
+    for req in &seen {
+        let enc = req
+            .headers
+            .get("accept-encoding")
+            .and_then(|v| v.to_str().ok());
+        assert_eq!(enc, Some("identity"), "{} {}", req.method, req.url);
+    }
+}
+
 fn client(server: &MockServer) -> Client {
     Client::new(ClientConfig {
         base_url: Url::parse(&server.uri()).unwrap(),
@@ -72,6 +85,7 @@ async fn probe_reports_total_and_range_support() {
     let p2 = c.probe(&url2).await.unwrap();
     assert_eq!(p2.total, Some(100_000));
     assert!(!p2.accept_ranges);
+    assert_identity_encoding(&server).await;
 }
 
 #[tokio::test]
@@ -101,6 +115,7 @@ async fn get_stream_delivers_exact_ranges() {
         got.extend_from_slice(&chunk.unwrap());
     }
     assert_eq!(got, body[49_990..].to_vec());
+    assert_identity_encoding(&server).await;
 }
 
 #[tokio::test]

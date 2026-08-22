@@ -7,7 +7,7 @@
 //! - [`model`] — the plain data types ([`Serial`], [`Translation`], [`Playlist`], [`Episode`], [`SearchHit`], …).
 //! - [`source`] — [`Source::parse`]: user input → canonical serial URL or bare numeric id.
 //! - [`decode`] — [`MarkerSet`] / [`decode_token`]: playlist token → media URL.
-//! - [`client`] — [`Client`] / [`ClientConfig`] / [`Proxy`]: HTTP with retries, proxy and marker set.
+//! - [`client`] — [`Client`] / [`ClientConfig`] / [`Proxy`]: HTTP with retries, proxy and marker set; [`Client::probe`] / [`Client::get_stream`] → [`Probe`] / [`ByteStream`] for media.
 //! - [`page`] — [`parse_serial_page`] / [`Client::fetch_serial`]: serial page → [`Serial`].
 //! - [`playlist`] — [`parse_playlist_json`] / [`Client::fetch_playlist`]: `plist.txt` → episodes.
 //! - [`search`] — [`parse_autocomplete`] / [`Client::autocomplete`]: `/autocomplete.php` → search hits.
@@ -31,7 +31,7 @@ pub mod source;
 #[cfg(feature = "test-support")]
 pub mod test_support;
 
-pub use client::{Client, ClientConfig, DEFAULT_USER_AGENT, Proxy};
+pub use client::{ByteStream, Client, ClientConfig, DEFAULT_USER_AGENT, Probe, Proxy};
 pub use decode::{MarkerSet, decode_token};
 pub use dto::CoreErrorDto;
 pub use error::{CoreError, DecodeError, Result};
