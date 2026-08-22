@@ -1430,7 +1430,7 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 - Produces (used by Task 7 CLI and Plan 3 desktop commands):
   - `Limits { concurrent_jobs: usize, segments_per_job: usize, max_connections: usize, retries: u32, min_segment_bytes: u64, speed_limit_kbps: u64, overwrite: bool, auto_resume: bool }` (`Default` = 3/4/12/5/4 MiB/0/false/true; `From<&Settings>`).
   - `JobState` (serde snake_case; `as_str()`, `parse(&str)`, `is_terminal()`), `Job` (serde + specta; `id: Uuid` as String on the wire, `serial_id, translation_id, ordinal, title, media_url: String, target_path: String, state, bytes_total: Option<u64>, bytes_done: u64, speed_bps: u64, error: Option<CoreErrorDto>, priority: i64, created_at: String, completed_at: Option<String>`), `EnqueueItem { episode: Episode, target_path: PathBuf }`, `Event` (serde tag = "type": `Added { job }`, `Progress { id, bytes_done, bytes_total, speed_bps }`, `StateChanged { id, state, error }`, `Removed { id }`, `Idle`).
-  - `Manager::new(client: Client, store: Option<Store>, limits: Limits) -> Result<Manager>` (async; loads persisted jobs), `enqueue(&self, serial: &Serial, translation: &Translation, items: Vec<EnqueueItem>) -> Result<Vec<Uuid>>`, `pause/resume/cancel/retry/move_to_top(&self, id: Uuid) -> Result<()>`, `remove(&self, id) -> Result<()>` (terminal jobs only; deletes the store row), `set_limits(&self, Limits)`, `jobs(&self) -> Vec<Job>`, `job(&self, id) -> Option<Job>`, `subscribe(&self) -> broadcast::Receiver<Event>`, `wait_idle(&self)` (resolves when no job is queued/starting/downloading), `shutdown(self)` (pauses running jobs, persists, stops the scheduler).
+  - `Manager::new(client: Client, store: Option<Store>, limits: Limits) -> Result<Manager>` (async; loads persisted jobs), `enqueue(&self, serial: &Serial, translation: &Translation, items: Vec<EnqueueItem>) -> Result<Vec<Uuid>>`, `pause/resume/cancel/retry/move_to_top(&self, id: Uuid) -> Result<()>`, `remove(&self, id) -> Result<()>` (terminal jobs only; deletes the store row), `set_limits(&self, Limits)`, `async jobs(&self) -> Vec<Job>`, `async job(&self, id) -> Option<Job>`, `subscribe(&self) -> broadcast::Receiver<Event>`, `wait_idle(&self)` (resolves when no job is queued/starting/downloading), `shutdown(self)` (pauses running jobs, persists, stops the scheduler).
 
 - [ ] **Step 1: Failing tests `tests/engine.rs`**
 
@@ -1465,7 +1465,7 @@ async fn wait_state(mgr: &Manager, id: Uuid, pred: impl Fn(JobState) -> bool, se
     let mut rx = mgr.subscribe();
     tokio::time::timeout(Duration::from_secs(secs), async {
         loop {
-            if let Some(j) = mgr.job(id) { if pred(j.state) { return j.state; } }
+            if let Some(j) = mgr.job(id).await { if pred(j.state) { return j.state; } }
             match rx.recv().await { Ok(_) => {}, Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => {}, Err(_) => panic!("channel closed") }
         }
     }).await.expect("job reached state in time")
@@ -1487,7 +1487,7 @@ async fn downloads_in_segments_and_finalizes() {
     let mut saw_progress = false;
     while let Ok(ev) = rx.try_recv() { if matches!(ev, Event::Progress { .. }) { saw_progress = true; } }
     assert!(saw_progress);
-    let job = mgr.job(ids[0]).unwrap();
+    let job = mgr.job(ids[0]).await.unwrap();
     assert_eq!(job.bytes_done, data.len() as u64);
     assert_eq!(job.bytes_total, Some(data.len() as u64));
     let segs = mgr.store().unwrap().segments(ids[0]).await.unwrap();
@@ -1557,7 +1557,7 @@ async fn changed_etag_restarts_from_zero() {
     mgr.resume(ids[0]).await.unwrap();
     assert_eq!(wait_state(&mgr, ids[0], |s| s.is_terminal(), 30).await, JobState::Completed);
     assert_eq!(std::fs::read(&target).unwrap(), data2);
-    assert_eq!(mgr.job(ids[0]).unwrap().resumed_from, 0);
+    assert_eq!(mgr.job(ids[0]).await.unwrap().resumed_from, 0);
     mgr.shutdown().await;
 }
 
@@ -1608,7 +1608,7 @@ async fn cancel_removes_part_file_and_http_error_fails_after_retries() {
     assert_eq!(wait_state(&mgr, ids[0], |s| s.is_terminal(), 10).await, JobState::Cancelled);
     assert!(!dir.path().join("g.mp4.part").exists());
     assert_eq!(wait_state(&mgr, ids[1], |s| s.is_terminal(), 20).await, JobState::Failed);
-    let err = mgr.job(ids[1]).unwrap().error.expect("error recorded");
+    let err = mgr.job(ids[1]).await.unwrap().error.expect("error recorded");
     assert_eq!(err.kind, "http");
     mgr.retry(ids[1]).await.unwrap();
     assert_eq!(wait_state(&mgr, ids[1], |s| s.is_terminal(), 20).await, JobState::Failed);
@@ -1804,13 +1804,13 @@ impl Manager {
         Ok(ids)
     }
 
-    pub fn jobs(&self) -> Vec<Job> {
-        let jobs = self.shared.jobs.blocking_lock_or_async();
+    pub async fn jobs(&self) -> Vec<Job> {
+        let jobs = self.shared.jobs.lock().await;
         let mut v: Vec<Job> = jobs.values().map(|e| e.job.clone()).collect();
         v.sort_by(|a, b| b.priority.cmp(&a.priority).then(a.created_at.cmp(&b.created_at)));
         v
     }
-    pub fn job(&self, id: Uuid) -> Option<Job> { self.shared.jobs.blocking_lock_or_async().get(&id).map(|e| e.job.clone()) }
+    pub async fn job(&self, id: Uuid) -> Option<Job> { self.shared.jobs.lock().await.get(&id).map(|e| e.job.clone()) }
 
     pub async fn pause(&self, id: Uuid) -> Result<()> {
         let mut jobs = self.shared.jobs.lock().await;
@@ -1926,15 +1926,8 @@ pub(crate) async fn job_from_row(r: &JobRow, store: &Store) -> Job {
         state: JobState::parse(&r.state).unwrap_or(JobState::Paused), bytes_total: r.bytes_total, bytes_done: r.bytes_done, speed_bps: 0, resumed_from: 0,
         error: r.error_json.as_deref().and_then(|s| serde_json::from_str(s).ok()), priority: r.priority, created_at: r.created_at.clone(), completed_at: r.completed_at.clone() }
 }
-
-/// `jobs()`/`job()` are sync for UI convenience: use `try_lock`, falling back to a short spin (the lock is never held across awaits that block).
-trait BlockingLock<T> { fn blocking_lock_or_async(&self) -> tokio::sync::MutexGuard<'_, T>; }
-impl<T> BlockingLock<T> for Mutex<T> {
-    fn blocking_lock_or_async(&self) -> tokio::sync::MutexGuard<'_, T> {
-        loop { if let Ok(g) = self.try_lock() { return g; } std::thread::yield_now(); }
-    }
-}
 ```
+`jobs()`/`job()` are `async` on purpose: the jobs mutex is a tokio `Mutex` that `set_state` holds across a store write, and `#[tokio::test]` runs on a current-thread runtime — a sync `try_lock` spin there would deadlock.
 Design notes the implementer must keep: the jobs `Mutex` is held only for map edits (never across a network/file await — `set_state` awaits a store write while holding it; that is acceptable because store writes are local and short, but do NOT hold it across `run`'s streaming). `Entry.intent` tells the worker, on cancellation, whether it was a pause (persist, keep `.part`) or a cancel (delete `.part` + segments). `Manager::shutdown` pauses everything so a restart resumes.
 
 - [ ] **Step 4: `src/download/worker.rs` — probe → plan → segments → finalize**
@@ -2980,7 +2973,7 @@ pub async fn run(ctx: &Ctx, a: &DownloadArgs) -> Result<(), CliError> {
     let style = ProgressStyle::with_template("{prefix:>3} {bar:28.yellow/black} {bytes:>10}/{total_bytes:<10} {bytes_per_sec:>11} {msg}").expect("template").progress_chars("━╸─");
     let mut bars: std::collections::HashMap<Uuid, ProgressBar> = std::collections::HashMap::new();
     if show_bars {
-        for (i, j) in manager.jobs().into_iter().filter(|j| mine.contains(&j.id)).enumerate() {
+        for (i, j) in manager.jobs().await.into_iter().filter(|j| mine.contains(&j.id)).enumerate() {
             let pb = multi.add(ProgressBar::new(0)); pb.set_style(style.clone()); pb.set_prefix(format!("{}", i + 1)); pb.set_message(short_name(&j.target_path)); pb.enable_steady_tick(Duration::from_millis(250));
             bars.insert(j.id, pb);
         }
@@ -2994,7 +2987,7 @@ pub async fn run(ctx: &Ctx, a: &DownloadArgs) -> Result<(), CliError> {
         manager.shutdown().await; // pauses + persists; resumable by the desktop app or a later run
         return Err(CliError::Interrupted);
     }
-    let jobs: Vec<Job> = manager.jobs().into_iter().filter(|j| mine.contains(&j.id)).collect();
+    let jobs: Vec<Job> = manager.jobs().await.into_iter().filter(|j| mine.contains(&j.id)).collect();
     manager.shutdown().await;
     let summary = Summary {
         completed: jobs.iter().filter(|j| j.state == JobState::Completed).count(), exists: jobs.iter().filter(|j| j.state == JobState::Exists).count(),
@@ -3022,7 +3015,7 @@ fn short_name(p: &str) -> String { std::path::Path::new(p).file_name().map(|f| f
 /// Pump events until every one of `mine` is terminal; keep bars current.
 async fn drain(manager: &Manager, events: &mut tokio::sync::broadcast::Receiver<Event>, mine: &std::collections::HashSet<Uuid>, bars: &std::collections::HashMap<Uuid, ProgressBar>) {
     loop {
-        if manager.jobs().iter().filter(|j| mine.contains(&j.id)).all(|j| j.state.is_terminal()) { return; }
+        if manager.jobs().await.iter().filter(|j| mine.contains(&j.id)).all(|j| j.state.is_terminal()) { return; }
         match events.recv().await {
             Ok(Event::Progress { id, bytes_done, bytes_total, .. }) => if let Some(pb) = bars.get(&id) { if let Some(t) = bytes_total { pb.set_length(t); } pb.set_position(bytes_done); },
             Ok(Event::StateChanged { id, state, error }) => if let Some(pb) = bars.get(&id) { match state {
@@ -3123,4 +3116,4 @@ Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>"
 
 **Type consistency.** `Store::open(&Path, StoreOptions) -> Result<Store>`, `reader() -> Connection`, `write(FnOnce(Connection) -> Fut)`, repos names (`upsert_serial/upsert_episodes/insert_job/update_job/get_job/list_jobs/delete_job/replace_segments/segments/set_segment_done/max_priority/library/recent_serials/episode_for`) match between Task 4 and Task 5/7. `JobRow`/`SegmentRow` field names match the V1 DDL. `JobState` strings match the store's `state` text. `Manager::{new, enqueue, pause, resume, cancel, retry, move_to_top, remove, set_limits, limits, jobs, job, subscribe, wait_idle, shutdown, store}` match Task 7 usage; `Job.resumed_from`, `Event::{Added,Progress,StateChanged,Removed,Idle}` match Task 5 tests. `Limits::from(&Settings)` uses `settings.engine.{concurrent_jobs,segments_per_job,retries,speed_limit_kbps}` and `settings.general.{overwrite,auto_resume}` (Task 2 fields). `Ctx::bootstrap`, `Paths::{discover,in_dir}`, `Settings::{load,save,to_toml_string,validate,client_config,template,download_dir,set_value}` match Task 2. `mount_cdn(&MockServer, &str, Vec<u8>, bool) -> Url` and `mount_autocomplete` live in `test_support`. Exit-code mapping lives only in `output::exit_code`. `CoreError::{Timeout, Db, DbLocked}` are introduced in Tasks 1/3 and used by `exit_code` — Task 6 depends on both.
 
-**Known judgment calls (controller rulings allowed):** `jobs()`/`job()` are sync via `try_lock` spin (UI convenience) — if clippy or review objects, make them `async` and update Task 7 call sites; `Manager::shutdown` waits ≤10 s for workers; the CLI forces `auto_resume=false` so persisted desktop jobs are not silently resumed by a one-off CLI run.
+**Known judgment calls (controller rulings allowed):** `Manager::jobs()`/`job()` are `async` (tokio mutex; current-thread test runtimes); `Manager::shutdown` waits ≤10 s for workers; the CLI forces `auto_resume=false` so persisted desktop jobs are not silently resumed by a one-off CLI run.
