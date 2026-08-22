@@ -32,6 +32,8 @@ pub enum CoreError {
     Db(String),
     #[error("config error: {0}")]
     Config(String),
+    #[error("unexpected response from the site: {0}")]
+    Protocol(String),
     #[error("cancelled")]
     Cancelled,
 }
@@ -51,6 +53,7 @@ impl CoreError {
             CoreError::Io(_) => "io",
             CoreError::Db(_) => "db",
             CoreError::Config(_) => "config",
+            CoreError::Protocol(_) => "protocol",
             CoreError::Cancelled => "cancelled",
         }
     }
@@ -91,6 +94,9 @@ impl CoreError {
             CoreError::Config(_) => {
                 Some("Fix the setting in Settings (or config.toml) and try again.")
             }
+            CoreError::Protocol(_) => Some(
+                "The site may have changed its format. Try again later, or report this if it persists.",
+            ),
             _ => None,
         }
     }
@@ -122,5 +128,6 @@ mod tests {
         let e: CoreError = DecodeError::UnsupportedScheme("#1".into()).into();
         assert_eq!(e.kind(), "decode");
         assert!(e.hint().unwrap().contains("marker"));
+        assert_eq!(CoreError::Protocol("x".into()).kind(), "protocol");
     }
 }

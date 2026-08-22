@@ -45,9 +45,13 @@ fn flatten(items: Vec<RawItem>, out: &mut Vec<RawEpisode>) {
     }
 }
 
+/// `<pre> серия <quality>[<br><translator>]`; `pre` is `N`, `N-M`, `N.5`, `Доп.`, ….
 static TITLE: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?is)^\s*(\d+)\s*серия\s*(?P<q>[^<]*?)\s*(?:<br\s*/?>\s*(?P<t>.*?))?\s*$").unwrap()
+    Regex::new(r"(?is)^\s*(?P<pre>[^<]*?)серия\s*(?P<q>[^<]*?)\s*(?:<br\s*/?>\s*(?P<t>.*?))?\s*$")
+        .unwrap()
 });
+/// Leading integer of the `pre` part: `215-216` → 215, `1116.5` → 1116, `Доп.` → none.
+static NUMBER: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*(\d+)").unwrap());
 static TAGS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?is)<br\s*/?>|<[^>]+>").unwrap());
 static SUBTITLE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\[(\w+)\]([^,\s\]]+)").unwrap());
 
@@ -58,11 +62,12 @@ fn clean_text(raw: &str) -> String {
 }
 
 /// (number, quality, translator) parsed from `N серия SD/FullHD<br>Translator`.
+/// Titles without `серия` (trailers: `Основной`, `Фичуретка`, …) give `(None, None, None)`.
 fn parse_title_parts(raw: &str) -> (Option<u32>, Option<String>, Option<String>) {
     let Some(c) = TITLE.captures(raw) else {
         return (None, None, None);
     };
-    let number = c[1].parse().ok();
+    let number = NUMBER.captures(&c["pre"]).and_then(|n| n[1].parse().ok());
     let quality = c
         .name("q")
         .map(|m| clean_text(m.as_str()))
@@ -89,7 +94,7 @@ fn parse_subtitles(raw: &str) -> Vec<Subtitle> {
 /// Parse playlist JSON into episodes. Returns `Ok(vec![])` for `[]`; the fetcher turns that into `EmptyPlaylist`.
 pub fn parse_playlist_json(body: &str, markers: &MarkerSet) -> Result<Vec<Episode>> {
     let items: Vec<RawItem> = serde_json::from_str(body)
-        .map_err(|e| CoreError::Config(format!("playlist is not valid JSON: {e}")))?;
+        .map_err(|e| CoreError::Protocol(format!("playlist is not valid JSON: {e}")))?;
     let mut raw = Vec::new();
     flatten(items, &mut raw);
     raw.into_iter()
@@ -138,5 +143,34 @@ impl Client {
             episodes,
             fetched_at: jiff::Timestamp::now(),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_title_parts;
+
+    #[test]
+    fn range_title_takes_first_number_and_keeps_parts() {
+        assert_eq!(
+            parse_title_parts("215-216 серия SD/FullHD<br>AniDUB"),
+            (Some(215), Some("SD/FullHD".into()), Some("AniDUB".into()))
+        );
+    }
+
+    #[test]
+    fn half_episode_title_truncates_to_integer() {
+        assert_eq!(
+            parse_title_parts("1116.5 серия HD<br>"),
+            (Some(1116), Some("HD".into()), None)
+        );
+    }
+
+    #[test]
+    fn extra_episode_title_has_no_number_but_keeps_quality() {
+        assert_eq!(
+            parse_title_parts("Доп. серия SD/HD<br>"),
+            (None, Some("SD/HD".into()), None)
+        );
     }
 }
