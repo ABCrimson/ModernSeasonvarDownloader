@@ -15,8 +15,10 @@
 //! - [`export`] — [`Format`] / [`render_export`]: episodes → links, wget/aria2c/custom scripts, M3U, JSON.
 //! - [`settings`] — [`Settings`] / [`Paths`]: `config.toml` (paths, defaults, validation, dotted `set`, [`ClientConfig`] bridge).
 //! - [`store`] — [`Store`] / [`StoreOptions`]: the Turso `seasonvar.db` (open/lock/integrity/backup, `user_version` migrations, repositories, [`JobRow`] / [`SegmentRow`] / [`LibraryShow`]).
+//! - [`download`] — [`Manager`] / [`Limits`] / [`Job`] / [`JobState`] / [`Event`]: the download engine (scheduler, segmented resumable workers, shared rate limiter, persisted progress).
 pub mod client;
 pub mod decode;
+pub mod download;
 pub mod dto;
 pub mod error;
 pub mod export;
@@ -35,6 +37,7 @@ pub mod test_support;
 
 pub use client::{ByteStream, Client, ClientConfig, DEFAULT_USER_AGENT, Probe, Proxy};
 pub use decode::{MarkerSet, decode_token};
+pub use download::{EnqueueItem, Event, Job, JobState, Limits, Manager};
 pub use dto::CoreErrorDto;
 pub use error::{CoreError, DecodeError, Result};
 pub use export::{ExportItem, Format, render_export};
