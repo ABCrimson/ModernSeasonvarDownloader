@@ -1,0 +1,128 @@
+npm	react	19.2.8	2026-07-21	npm view react version time --json
+npm	react-dom	19.2.8	2026-07-21	npm view react-dom version time --json
+npm	@types/react	19.2.18	2026-07-30	npm view @types/react version time --json
+npm	typescript	7.0.2	2026-07-08	npm view typescript version time --json
+npm	vite	8.2.2	2026-08-20	npm view vite version time --json
+npm	@vitejs/plugin-react	6.1.0	2026-08-20	npm view @vitejs/plugin-react version time --json
+npm	tailwindcss	4.3.3	2026-07-16	npm view tailwindcss version time --json
+npm	@tailwindcss/vite	4.3.3	2026-07-16	npm view @tailwindcss/vite version time --json
+npm	shadcn	4.19.0	2026-08-21	npm view shadcn version time --json
+npm	@tanstack/react-query	5.101.4	2026-07-21	npm view @tanstack/react-query version time --json
+npm	@tanstack/react-router	1.170.31	2026-08-19	npm view @tanstack/react-router version time --json
+npm	@tanstack/react-virtual	3.14.10	2026-08-18	npm view @tanstack/react-virtual version time --json
+npm	@tanstack/react-start	1.168.48	2026-08-19	npm view @tanstack/react-start version time --json
+npm	zustand	5.0.15	2026-08-13	npm view zustand version time --json
+npm	jotai	2.20.2	2026-07-14	npm view jotai version time --json
+npm	@biomejs/biome	2.5.10	2026-08-21	npm view @biomejs/biome version time --json
+npm	oxlint	1.79.0	2026-08-18	npm view oxlint version time --json
+npm	eslint	10.9.0	2026-08-21	npm view eslint version time --json
+npm	vitest	4.1.11	2026-08-18	npm view vitest version time --json
+npm	@playwright/test	1.62.1	2026-07-30	npm view @playwright/test version time --json
+npm	@tauri-apps/cli	2.11.4	2026-06-28	npm view @tauri-apps/cli version time --json
+npm	@tauri-apps/api	2.11.1	2026-06-17	npm view @tauri-apps/api version time --json
+npm	@tauri-apps/plugin-updater	2.10.1	2026-04-04	npm view @tauri-apps/plugin-updater version time --json
+npm	@tauri-apps/plugin-store	2.4.4	2026-07-18	npm view @tauri-apps/plugin-store version time --json
+npm	@tauri-apps/plugin-notification	2.3.3	2025-10-27	npm view @tauri-apps/plugin-notification version time --json
+npm	@tauri-apps/plugin-dialog	2.7.2	2026-07-18	npm view @tauri-apps/plugin-dialog version time --json
+npm	@tauri-apps/plugin-fs	2.5.1	2026-05-02	npm view @tauri-apps/plugin-fs version time --json
+npm	@tauri-apps/plugin-shell	2.3.5	2026-02-03	npm view @tauri-apps/plugin-shell version time --json
+npm	@tauri-apps/plugin-http	2.5.9	2026-05-02	npm view @tauri-apps/plugin-http version time --json
+npm	@tauri-apps/plugin-opener	2.5.4	2026-05-02	npm view @tauri-apps/plugin-opener version time --json
+npm	@tauri-apps/plugin-window-state	2.4.1	2025-10-27	npm view @tauri-apps/plugin-window-state version time --json
+npm	@tauri-apps/plugin-deep-link	2.4.9	2026-05-02	npm view @tauri-apps/plugin-deep-link version time --json
+npm	electron	43.4.1	2026-08-19	npm view electron version time --json
+npm	next	16.3.2	2026-08-21	npm view next version time --json
+npm	pnpm	11.22.0	2026-08-15	npm view pnpm version time --json
+npm	bun	1.4.0	2026-08-20	npm view bun version time --json
+npm	motion	13.1.1	2026-08-20	npm view motion version time --json
+npm	framer-motion	13.1.1	2026-08-20	npm view framer-motion version time --json
+npm	lucide-react	1.33.0	2026-08-19	npm view lucide-react version time --json
+npm	zod	4.4.3	2026-05-04	npm view zod version time --json
+npm	valibot	1.4.2	2026-06-28	npm view valibot version time --json
+npm	effect	3.22.1	2026-07-30	npm view effect version time --json
+npm	@effect/platform	0.97.1	2026-07-30	npm view @effect/platform version time --json
+npm	ink	7.1.1	2026-07-16	npm view ink version time --json
+npm	@opentui/core	0.5.6	2026-08-20	npm view @opentui/core version time --json
+npm	rolldown	1.2.5	2026-08-19	npm view rolldown version time --json
+crate	tauri	2.11.5	2026-07-01	curl crates.io/api/v1/crates/tauri
+crate	tauri-build	2.6.3	2026-06-17	curl crates.io/api/v1/crates/tauri-build
+crate	tauri-plugin-updater	2.10.1	2026-04-04	curl crates.io/api/v1/crates/tauri-plugin-updater
+crate	tauri-plugin-store	2.4.4	2026-07-18	curl crates.io/api/v1/crates/tauri-plugin-store
+crate	tauri-plugin-notification	2.3.3	2025-10-27	curl crates.io/api/v1/crates/tauri-plugin-notification
+crate	tauri-plugin-dialog	2.7.2	2026-07-18	curl crates.io/api/v1/crates/tauri-plugin-dialog
+crate	tauri-plugin-fs	2.5.1	2026-05-02	curl crates.io/api/v1/crates/tauri-plugin-fs
+crate	tauri-plugin-shell	2.3.5	2026-02-03	curl crates.io/api/v1/crates/tauri-plugin-shell
+crate	tauri-plugin-http	2.5.9	2026-05-02	curl crates.io/api/v1/crates/tauri-plugin-http
+crate	tauri-plugin-opener	2.5.4	2026-05-02	curl crates.io/api/v1/crates/tauri-plugin-opener
+crate	tauri-plugin-window-state	2.4.1	2025-10-27	curl crates.io/api/v1/crates/tauri-plugin-window-state
+crate	tauri-plugin-deep-link	2.4.9	2026-05-02	curl crates.io/api/v1/crates/tauri-plugin-deep-link
+crate	tauri-specta	1.0.2	2023-05-18	(max incl. prerelease: 2.0.0-rc.25)	curl crates.io/api/v1/crates/tauri-specta
+crate	specta	1.0.5	2023-07-17	(max incl. prerelease: 2.0.0-rc.25)	curl crates.io/api/v1/crates/specta
+crate	reqwest	0.13.4	2026-05-25	curl crates.io/api/v1/crates/reqwest
+crate	tokio	1.53.1	2026-07-20	curl crates.io/api/v1/crates/tokio
+crate	hyper	1.11.0	2026-07-20	curl crates.io/api/v1/crates/hyper
+crate	scraper	0.27.0	2026-05-11	curl crates.io/api/v1/crates/scraper
+crate	serde	1.0.229	2026-07-18	curl crates.io/api/v1/crates/serde
+crate	serde_json	1.0.151	2026-07-20	curl crates.io/api/v1/crates/serde_json
+crate	thiserror	2.0.20	2026-08-08	curl crates.io/api/v1/crates/thiserror
+crate	anyhow	1.0.104	2026-07-18	curl crates.io/api/v1/crates/anyhow
+crate	tracing	0.1.44	2025-12-18	curl crates.io/api/v1/crates/tracing
+crate	rusqlite	0.40.2	2026-08-08	curl crates.io/api/v1/crates/rusqlite
+crate	sqlx	0.9.0	2026-05-21	curl crates.io/api/v1/crates/sqlx
+crate	sea-orm	2.0.2	2026-08-12	curl crates.io/api/v1/crates/sea-orm
+crate	clap	4.6.6	2026-08-06	curl crates.io/api/v1/crates/clap
+crate	ratatui	0.30.2	2026-06-19	curl crates.io/api/v1/crates/ratatui
+crate	dioxus	0.7.10	2026-07-30	(max incl. prerelease: 0.8.0-alpha.1)	curl crates.io/api/v1/crates/dioxus
+crate	iced	0.14.0	2025-12-07	curl crates.io/api/v1/crates/iced
+crate	gpui	0.2.2	2025-10-22	curl crates.io/api/v1/crates/gpui
+crate	slint	1.17.1	2026-07-07	curl crates.io/api/v1/crates/slint
+crate	indicatif	0.18.6	2026-07-01	curl crates.io/api/v1/crates/indicatif
+crate	futures	0.3.34	2026-08-11	curl crates.io/api/v1/crates/futures
+crate	async-stream	0.3.6	2024-10-01	curl crates.io/api/v1/crates/async-stream
+crate	url	2.5.8	2026-01-05	curl crates.io/api/v1/crates/url
+crate	base64	0.23.1	2026-08-04	curl crates.io/api/v1/crates/base64
+crate	regex	1.13.1	2026-07-15	curl crates.io/api/v1/crates/regex
+crate	governor	0.10.4	2025-12-16	curl crates.io/api/v1/crates/governor
+crate	directories	6.0.0	2025-01-12	curl crates.io/api/v1/crates/directories
+gh	rust-lang/rust	1.98.0	2026-08-20	gh api repos/rust-lang/rust/releases/latest
+gh	oven-sh/bun	bun-v1.4.0	2026-08-20	gh api repos/oven-sh/bun/releases/latest
+gh	tauri-apps/tauri	tauri-v2.11.5	2026-07-01	gh api repos/tauri-apps/tauri/releases/latest
+gh	denoland/deno	v2.9.5	2026-08-06	gh api repos/denoland/deno/releases/latest
+gh	oxc-project/oxc	apps_v1.79.0	2026-08-18	gh api repos/oxc-project/oxc/releases/latest
+gh	rolldown/rolldown	v1.2.5	2026-08-19	gh api repos/rolldown/rolldown/releases/latest
+gh	wailsapp/wails	v2.14.0	2026-08-10	gh api repos/wailsapp/wails/releases/latest
+gh	electron/electron	v43.4.1	2026-08-19	gh api repos/electron/electron/releases/latest
+gh	vitejs/vite	v8.2.2	2026-08-20	gh api repos/vitejs/vite/releases/latest
+gh	biomejs/biome	@biomejs/biome@2.5.10	2026-08-21	gh api repos/biomejs/biome/releases/latest
+gh	shadcn-ui/ui	shadcn@4.19.0	2026-08-21	gh api repos/shadcn-ui/ui/releases/latest
+gh	nodejs/node (current)	v26.7.0	2026-08-05	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Krypton	v24.19.0	2026-08-03	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Jod	v22.23.2	2026-07-28	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Iron	v20.20.2	2026-03-24	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Hydrogen	v18.20.8	2025-03-27	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Gallium	v16.20.2	2023-08-08	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Fermium	v14.21.3	2023-02-16	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Erbium	v12.22.12	2022-04-05	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Dubnium	v10.24.1	2021-04-06	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Carbon	v8.17.0	2019-12-17	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Boron	v6.17.1	2019-04-03	curl nodejs.org/dist/index.json
+gh	nodejs/node LTS Argon	v4.9.1	2018-03-29	curl nodejs.org/dist/index.json
+# node majors latest: v26.7.0(current), v25.9.0(current), v24.19.0(Krypton), v23.11.1(current)
+# wails tags (top 5):
+webview2/v1.0.28 webview2/v1.0.27 webview2/v1.0.26 webview2/v1.0.25 webview2/v1.0.24 v3.0.0-beta.12 v3.0.0-beta.11 v3.0.0-beta.10 
+# rust stable channel: version = "1.98.0 (88d9e12ae 2026-08-18)"
+# dist-tags (npm view <pkg> dist-tags --json):
+tags	react	beta=19.0.0-beta-26f2496093-20240514 rc=19.0.0-rc.1 next=19.3.0-canary-d5736f09-20260507 latest=19.2.8 backport=19.0.8 canary=19.3.0-canary-eafeac09-20260819 experimental=0.0.0-experimental-eafeac09-20260819
+tags	vite	alpha=6.0.0-alpha.24 previous=7.3.6 beta=8.2.0-beta.0 latest=8.2.2
+tags	@vitejs/plugin-react	alpha=3.0.0-alpha.2 beta=6.0.0-beta.0 latest=6.1.0
+tags	tailwindcss	next=4.0.0 v3-lts=3.4.19 latest=4.3.3 insiders=0.0.0-insiders.90f8ff4
+tags	shadcn	canary=4.2.0-canary.0 rc=4.10.0-rc.674ae44 beta=0.0.0-beta.01b72a3 latest=4.19.0
+tags	@biomejs/biome	nightly=1.9.5-nightly.81fdedb beta=2.0.0-beta.6 latest=2.5.10
+tags	@tanstack/react-start	beta=0.0.1-beta.204 alpha=1.132.0-alpha.25 pre=1.168.33-pre.0 latest=1.168.48
+tags	@tauri-apps/cli	next=2.0.0-rc.18 latest=2.11.4
+tags	@tauri-apps/api	next=2.0.1 latest=2.11.1
+tags	typescript	dev=3.9.4 tag-for-publishing-older-releases=4.1.6 insiders=4.6.2-insiders.20220225 beta=6.0.0-beta rc=7.0.1-rc latest=7.0.2 next=7.1.0-dev.20260821.1
+tags	electron	unsupported=2.1.0-unsupported.20180809 1-8-x=1.8.8 1-7-x=1.7.16 beta-4-0-x=4.0.0-beta.11 beta-3-1-x=3.1.0-beta.5 2-0-x=2.0.18 3-0-x=3.0.16 4-0-x=4.0.8 beta-5-0-x=5.0.0-beta.9 4-1-x=4.1.5 3-1-x=3.1.12 beta-6-0-x=6.0.0-beta.15 6-0-x=6.0.12 beta-7-0-x=7.0.0-beta.7 4-2-x=4.2.12 7-0-x=7.0.1 5-0-x=5.0.13 beta-8-x-y=8.0.0-beta.9 7-1-x=7.1.14 7-2-x=7.2.4 beta-9-x-y=9.0.0-beta.24 6-1-x=6.1.12 beta-10-x-y=10.0.0-beta.25 7-3-x=7.3.3 beta-11-x-y=11.0.0-beta.23 8-x-y=8.5.5 beta-12-x-y=12.0.0-beta.31 9-x-y=9.4.4 origin/11-x-y=11.4.0 beta-13-x-y=13.0.0-beta.28 10-x-y=10.4.7 alpha-15-x-y=15.0.0-alpha.10 beta-14-x-y=14.0.0-beta.25 11-x-y=11.5.0 beta-15-x-y=15.0.0-beta.7 alpha-16-x-y=16.0.0-alpha.9 beta-16-x-y=16.0.0-beta.9 12-x-y=12.2.3 alpha-17-x-y=17.0.0-alpha.6 beta-17-x-y=17.0.0-beta.9 13-x-y=13.6.9 alpha-18-x-y=18.0.0-alpha.5 beta-18-x-y=18.0.0-beta.6 14-x-y=14.2.9 alpha-19-x-y=19.0.0-alpha.5 beta-19-x-y=19.0.0-beta.8 15-x-y=15.5.7 16-x-y=16.2.8 alpha-20-x-y=20.0.0-alpha.7 beta-20-x-y=20.0.0-beta.13 17-x-y=17.4.11 alpha-21-x-y=21.0.0-alpha.6 beta-21-x-y=21.0.0-beta.8 18-x-y=18.3.15 alpha-22-x-y=22.0.0-alpha.8 beta-22-x-y=22.0.0-beta.8 19-x-y=19.1.9 alpha-23-x-y=23.0.0-alpha.3 beta-23-x-y=23.0.0-beta.8 20-x-y=20.3.12 alpha-24-x-y=24.0.0-alpha.7 beta-24-x-y=24.0.0-beta.7 21-x-y=21.4.4 alpha-25-x-y=25.0.0-alpha.6 beta-25-x-y=25.0.0-beta.8 alpha-26-x-y=26.0.0-alpha.8 beta-26-x-y=26.0.0-beta.12 23-x-y=23.3.13 alpha-27-x-y=27.0.0-alpha.6 beta-27-x-y=27.0.0-beta.9 22-x-y=22.3.27 24-x-y=24.8.8 alpha-28-x-y=28.0.0-alpha.7 beta-28-x-y=28.0.0-beta.11 25-x-y=25.9.8 alpha-29-x-y=29.0.0-alpha.11 beta-29-x-y=29.0.0-beta.12 26-x-y=26.6.10 alpha-30-x-y=30.0.0-alpha.7 beta-30-x-y=30.0.0-beta.8 27-x-y=27.3.11 alpha-31-x-y=31.0.0-alpha.5 28-x-y=28.3.3 beta-31-x-y=31.0.0-beta.10 alpha-32-x-y=32.0.0-alpha.10 beta-32-x-y=32.0.0-beta.7 29-x-y=29.4.6 30-x-y=30.5.1 alpha-33-x-y=33.0.0-alpha.6 beta-33-x-y=33.0.0-beta.11 alpha-34-x-y=34.0.0-alpha.9 beta-34-x-y=34.0.0-beta.16 31-x-y=31.7.7 alpha-35-x-y=35.0.0-alpha.5 beta-35-x-y=35.0.0-beta.13 32-x-y=32.3.3 alpha-36-x-y=36.0.0-alpha.6 beta-36-x-y=36.0.0-beta.9 33-x-y=33.4.11 alpha-37-x-y=37.0.0-alpha.7 34-x-y=34.5.8 beta-37-x-y=37.0.0-beta.9 alpha-38-x-y=38.0.0-alpha.13 35-x-y=35.7.5 beta-38-x-y=38.0.0-beta.11 alpha-39-x-y=39.0.0-alpha.9 36-x-y=36.9.5 beta-39-x-y=39.0.0-beta.5 alpha-40-x-y=40.0.0-alpha.8 37-x-y=37.10.3 beta-40-x-y=40.0.0-beta.9 alpha-41-x-y=41.0.0-alpha.6 beta-41-x-y=41.0.0-beta.8 38-x-y=38.8.6 alpha-42-x-y=42.0.0-alpha.6 beta-42-x-y=42.0.0-beta.8 39-x-y=39.8.10 alpha-43-x-y=43.0.0-alpha.7 beta-43-x-y=43.0.0-beta.8 40-x-y=40.10.6 alpha=44.0.0-alpha.9 alpha-44-x-y=44.0.0-alpha.9 beta=44.0.0-beta.6 beta-44-x-y=44.0.0-beta.6 41-x-y=41.10.6 42-x-y=42.9.3 43-x-y=43.4.1 latest=43.4.1
+tags	next	next-11=11.1.4 next-12-2-6=12.2.6 next-14-1=14.1.1 rc=15.0.0-rc.1 next-13=13.5.11 next-12-3-2=12.3.7 beta=16.0.0-beta.0 next-14=14.2.35 next-15-3=15.3.9 next-15-2=15.2.9 next-15-0=15.1.12 next-15-0-0=15.0.8 preview=16.3.0-preview.10 backport=15.5.23 latest=16.3.2 canary=16.4.0-canary.1
+tags	oxlint	latest=1.79.0
+tags	rolldown	latest=1.2.5

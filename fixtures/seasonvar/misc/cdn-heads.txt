@@ -1,0 +1,70 @@
+HTTP/1.1 200 OK
+Server: nginx/1.22.1
+Date: Sat, 22 Aug 2026 02:44:03 GMT
+Content-Type: video/mp4
+Content-Length: 176851416
+Last-Modified: Fri, 21 Aug 2026 12:34:04 GMT
+Connection: keep-alive
+ETag: "6a8845bc-a8a89d8"
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.22.0
+Date: Sat, 22 Aug 2026 02:44:04 GMT
+Content-Type: video/mp4
+Content-Length: 208544011
+Last-Modified: Mon, 03 Aug 2026 02:01:38 GMT
+Connection: keep-alive
+ETag: "6a6ff682-c6e210b"
+Access-Control-Allow-Origin: *
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.14.2
+Date: Sat, 22 Aug 2026 02:44:06 GMT
+Content-Type: video/mp4
+Content-Length: 20400299
+Last-Modified: Wed, 24 Jan 2018 17:39:00 GMT
+Connection: keep-alive
+ETag: "5a68c4b4-13748ab"
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.22.0
+Date: Sat, 22 Aug 2026 02:44:07 GMT
+Content-Type: video/mp4
+Content-Length: 208544011
+Last-Modified: Mon, 03 Aug 2026 02:01:38 GMT
+Connection: keep-alive
+ETag: "6a6ff682-c6e210b"
+Access-Control-Allow-Origin: *
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.22.0
+Date: Sat, 22 Aug 2026 02:44:09 GMT
+Content-Type: video/mp4
+Content-Length: 208544011
+Last-Modified: Mon, 03 Aug 2026 02:01:38 GMT
+Connection: keep-alive
+ETag: "6a6ff682-c6e210b"
+Access-Control-Allow-Origin: *
+Accept-Ranges: bytes
+
+HTTP/1.1 404 Not Found
+Server: nginx/1.22.0
+Date: Sat, 22 Aug 2026 02:44:10 GMT
+Content-Type: text/html; charset=iso-8859-1
+Connection: keep-alive
+
+HTTP/1.1 200 OK
+Server: nginx/1.22.0
+Date: Sat, 22 Aug 2026 02:44:10 GMT
+Content-Type: video/mp4
+Content-Length: 208544011
+Last-Modified: Mon, 03 Aug 2026 02:01:38 GMT
+Connection: keep-alive
+ETag: "6a6ff682-c6e210b"
+Access-Control-Allow-Origin: *
+Accept-Ranges: bytes
+

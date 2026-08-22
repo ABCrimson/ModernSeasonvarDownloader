@@ -1,0 +1,513 @@
+<title>Seasonvar Downloader BOM</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: oklch(0.145 0.014 265);
+    --bg-deep: oklch(0.12 0.012 265);
+    --card: oklch(0.185 0.016 265);
+    --card-2: oklch(0.21 0.018 265);
+    --line: oklch(0.96 0.008 265 / .09);
+    --line-strong: oklch(0.96 0.008 265 / .16);
+    --ink: oklch(0.93 0.01 265);
+    --ink-2: oklch(0.78 0.012 265);
+    --ink-3: oklch(0.62 0.012 265);
+    --gold: oklch(0.8 0.14 85);
+    --gold-dark: oklch(0.72 0.145 80);
+    --gold-light: oklch(0.88 0.115 90);
+    --violet: oklch(0.7 0.15 295);
+    --ok: oklch(0.78 0.15 150);
+    --warn: oklch(0.72 0.16 60);
+    --bad: oklch(0.68 0.18 25);
+    --r-1: 6px; --r-2: 10px; --r-3: 16px; --r-4: 24px;
+    --mono: ui-monospace, "Cascadia Code", "JetBrains Mono", "SF Mono", Consolas, monospace;
+    --sans: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  }
+  @property --glow-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+  * { box-sizing: border-box; }
+  html { scrollbar-gutter: stable; scroll-behavior: smooth; scrollbar-color: oklch(0.4 0.01 265) transparent; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-size: clamp(0.95rem, 0.9rem + 0.25vw, 1.0625rem); line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  body::before {
+    content: ""; position: fixed; inset: -20% -10% auto -10%; height: 70vh; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(60% 50% at 20% 10%, oklch(from var(--gold) l c h / .07), transparent 70%),
+      radial-gradient(45% 40% at 85% 0%, oklch(from var(--violet) l c h / .06), transparent 70%);
+  }
+  body::after {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .025;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+  a { color: var(--gold-light); text-decoration: none; border-bottom: 1px solid oklch(from var(--gold) l c h / .35); }
+  a:hover { border-bottom-color: var(--gold); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: var(--r-1); }
+  .skip { position: absolute; left: -999px; top: 0; background: var(--gold); color: oklch(0.2 0.02 85); padding: .5rem 1rem; z-index: 99; }
+  .skip:focus { left: 1rem; top: 1rem; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 clamp(1rem, 3vw, 2.5rem); }
+
+  header.hero { padding: 4rem 0 2.5rem; }
+  .eyebrow { font-family: var(--mono); font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+  h1 {
+    margin: .5rem 0 .75rem; font-size: clamp(2.25rem, 5vw, 3.6rem); line-height: 1.05; letter-spacing: -.02em; text-wrap: balance;
+    background: linear-gradient(100deg, var(--ink) 0%, var(--gold-light) 55%, var(--gold) 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
+    text-box: trim-both cap alphabetic;
+  }
+  .dek { max-width: 72ch; color: var(--ink-2); font-size: 1.1em; margin: 0 0 1.25rem; text-wrap: pretty; }
+  .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .chip {
+    font-family: var(--mono); font-size: .78rem; padding: .3rem .65rem; border-radius: 999px;
+    border: 1px solid var(--line-strong); background: oklch(from var(--card) l c h / .7); color: var(--ink-2); font-variant-numeric: tabular-nums;
+  }
+  .chip b { color: var(--gold-light); font-weight: 600; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 5; margin: 0 0 2rem; padding: .6rem 0;
+    background: oklch(from var(--bg) l c h / .72); backdrop-filter: blur(14px) saturate(1.4);
+    border-block: 1px solid var(--line);
+  }
+  nav.toc .wrap { display: flex; flex-wrap: wrap; gap: .35rem 1rem; align-items: center; }
+  nav.toc a { font-size: .85rem; color: var(--ink-2); border: 0; padding: .25rem .4rem; border-radius: var(--r-1); }
+  nav.toc a:hover, nav.toc a[aria-current="true"] { color: var(--gold-light); background: oklch(from var(--gold) l c h / .1); }
+  nav.toc .filter { margin-left: auto; display: flex; align-items: center; gap: .5rem; }
+  nav.toc input {
+    font: inherit; font-size: .85rem; color: var(--ink); background: var(--card); border: 1px solid var(--line-strong); border-radius: var(--r-2);
+    padding: .4rem .7rem; min-width: 14rem; field-sizing: content;
+  }
+  nav.toc input::placeholder { color: var(--ink-3); }
+  nav.toc .count { font-family: var(--mono); font-size: .75rem; color: var(--ink-3); min-width: 7ch; text-align: right; font-variant-numeric: tabular-nums; }
+
+  section { padding: 1.5rem 0 2.25rem; content-visibility: auto; contain-intrinsic-size: auto 600px; }
+  section + section { border-top: 1px solid var(--line); }
+  h2 { font-size: clamp(1.4rem, 2.4vw, 1.85rem); letter-spacing: -.02em; margin: 0 0 .35rem; text-wrap: balance; text-box: trim-both cap alphabetic; }
+  h2 .n { font-family: var(--mono); font-size: .7em; color: var(--gold); margin-right: .6rem; font-weight: 500; }
+  .lede { color: var(--ink-2); margin: .5rem 0 1.25rem; max-width: 85ch; text-wrap: pretty; }
+  p { max-width: 85ch; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--r-3);
+    box-shadow: 0 1px 2px oklch(0 0 0 / .3), 0 12px 40px -12px oklch(0 0 0 / .5), inset 0 1px 0 oklch(1 0 0 / .06);
+  }
+  .tablewrap { overflow-x: auto; overscroll-behavior: contain; border-radius: var(--r-3); }
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .92rem; }
+  thead th {
+    position: sticky; top: 3.1rem; z-index: 2; text-align: left; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+    background: var(--card-2); padding: .7rem .85rem; border-bottom: 1px solid var(--line-strong);
+  }
+  tbody td { padding: .6rem .85rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(even) td { background: oklch(1 0 0 / .015); }
+  tbody tr:hover td { background: oklch(from var(--gold) l c h / .05); }
+  tbody tr:last-child td { border-bottom: 0; }
+  tbody tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--violet); }
+  td.pkg { font-family: var(--mono); font-size: .85rem; white-space: nowrap; color: var(--ink); }
+  td.ver { font-family: var(--mono); font-size: .85rem; white-space: nowrap; color: var(--gold-light); font-variant-numeric: tabular-nums; }
+  td.why { color: var(--ink-2); min-width: 22ch; }
+  td.alt { font-family: var(--mono); font-size: .78rem; color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  td.st { white-space: nowrap; }
+  .tag {
+    display: inline-block; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; padding: .15rem .5rem; border-radius: 999px; font-weight: 600;
+    border: 1px solid transparent;
+  }
+  .tag.chosen { color: var(--gold-light); background: oklch(from var(--gold) l c h / .12); border-color: oklch(from var(--gold) l c h / .3); }
+  .tag.bet { color: oklch(from var(--violet) calc(l + .12) c h); background: oklch(from var(--violet) l c h / .14); border-color: oklch(from var(--violet) l c h / .35); }
+  .tag.env { color: var(--ink-2); background: oklch(1 0 0 / .06); border-color: var(--line-strong); }
+  .tag.deferred { color: var(--ink-3); background: oklch(1 0 0 / .04); border-color: var(--line); }
+  .tag.rejected { color: var(--ink-3); background: transparent; border-color: var(--line); text-decoration: line-through; text-decoration-color: oklch(from var(--bad) l c h / .6); }
+  .tag.v2 { color: oklch(from var(--violet) calc(l + .15) c h); background: transparent; border-color: oklch(from var(--violet) l c h / .5); }
+  .sub { display: block; font-family: var(--sans); font-size: .78rem; color: var(--ink-3); white-space: normal; margin-top: .15rem; }
+  kbd, code { font-family: var(--mono); font-size: .85em; background: oklch(1 0 0 / .06); padding: .1em .35em; border-radius: 4px; border: 1px solid var(--line); }
+
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: 1rem; }
+  .callout { padding: 1.25rem 1.4rem; border-radius: var(--r-3); border: 1px solid var(--line); background: var(--card); }
+  .callout.gold { border-color: oklch(from var(--gold) l c h / .35); background: linear-gradient(180deg, oklch(from var(--gold) l c h / .08), transparent 60%), var(--card); }
+  .callout.violet { border-color: oklch(from var(--violet) l c h / .35); background: linear-gradient(180deg, oklch(from var(--violet) l c h / .08), transparent 60%), var(--card); }
+  .callout h3 { margin: 0 0 .5rem; font-size: 1.05rem; letter-spacing: -.01em; }
+  .callout ul { margin: .25rem 0 0; padding-left: 1.1rem; color: var(--ink-2); }
+  .callout li { margin: .3rem 0; text-wrap: pretty; }
+  .callout li b { color: var(--ink); font-weight: 600; }
+
+  .stat { font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 700; letter-spacing: -.03em; color: var(--gold-light); font-variant-numeric: tabular-nums; line-height: 1; }
+  .stat small { display: block; font-size: .8rem; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); margin-top: .4rem; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: 1rem; margin: 1.5rem 0 0; }
+  .stats .card { padding: 1rem 1.1rem; }
+
+  footer { padding: 2rem 0 4rem; color: var(--ink-3); font-size: .85rem; border-top: 1px solid var(--line); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .tag, .chip, nav.toc a { transition: background .15s, color .15s; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+  @media (max-width: 720px) { nav.toc .filter { width: 100%; } nav.toc input { width: 100%; } thead th { top: 0; } }
+  @media print {
+    body::before, body::after, nav.toc { display: none; }
+    body { background: white; color: black; }
+    .card, .callout { box-shadow: none; border-color: #bbb; background: white; }
+    a::after { content: " (" attr(href) ")"; font-size: .8em; }
+    h1 { color: black; -webkit-text-fill-color: black; background: none; }
+    .tag.chosen, .tag.bet { print-color-adjust: exact; }
+  }
+</style>
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">ModernSeasonvarDownloader · design step 1b · BOM v2 · 2026-08-21</div>
+    <h1>Bill of Materials</h1>
+    <p class="dek">Every version we pin before the first line of code. Each number was read from a registry by a script today and re-checked by an independent verifier. v2 applies your four calls: TypeScript 7, RCs adopted aggressively, Vitest Browser Mode, Biome + oxlint. Rows that changed from v1 carry a violet edge and a <span class="tag v2">v2</span> mark.</p>
+    <div class="chips">
+      <span class="chip"><b>Rust</b> 1.99.0-beta.1</span>
+      <span class="chip"><b>Tauri</b> 2.11.5</span>
+      <span class="chip"><b>React</b> 19.3 canary</span>
+      <span class="chip"><b>Vite</b> 8.2.2 · rolldown</span>
+      <span class="chip"><b>TypeScript</b> 7.0.2 native</span>
+      <span class="chip"><b>Vitest</b> 5.0.0-rc.2 · browser</span>
+      <span class="chip"><b>pnpm</b> 12.0.0-rc.8</span>
+      <span class="chip">133 lookups · 0 refuted</span>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="wrap">
+    <a href="#ctx">Context</a>
+    <a href="#tool">Toolchain</a>
+    <a href="#ci">CI</a>
+    <a href="#core">core</a>
+    <a href="#cli">cli</a>
+    <a href="#tauri">Tauri app</a>
+    <a href="#fe">Frontend</a>
+    <a href="#fetool">FE tooling</a>
+    <a href="#rej">Rejected</a>
+    <a href="#dec">Decisions</a>
+    <a href="#risk">Risks</a>
+    <a href="#verify">Verification</a>
+    <div class="filter">
+      <input id="f" type="search" placeholder="Filter rows… (e.g. tauri, rc, v2)" aria-label="Filter all tables">
+      <span class="count" id="fc"></span>
+    </div>
+  </div>
+</nav>
+
+<main id="main" class="wrap">
+
+<section id="ctx">
+  <h2>Context</h2>
+  <p class="lede">You chose a core-first Cargo workspace: a pure-Rust <code>seasonvar-core</code> library consumed by a <code>seasonvar</code> CLI and a Tauri 2 desktop app with a React UI. Scope is parity + finishing the two stubs (real download manager, history) + what the site now exposes (translations, seasons, metadata). <b>Pre-release policy (your call, v2):</b> adopt the next major/minor of a chosen package once it reaches RC (Vitest 5, pnpm 12, radix-ui 1.7), plus React's canary channel, plus Rust beta as the toolchain's RC; alpha/dev/nightly builds (TS 7.1-dev, Playwright 1.63-alpha, zod 4.5-canary, Tailwind insiders) stay out. Status tags: <span class="tag chosen">chosen</span> stable pick · <span class="tag bet">bet</span> bleeding-edge with a named fallback · <span class="tag env">env</span> already on your machine · <span class="tag deferred">deferred</span> later scope · <span class="tag rejected">rejected</span> considered, not used.</p>
+  <div class="stats">
+    <div class="card"><div class="stat">133<small>versions pinned</small></div></div>
+    <div class="card"><div class="stat">59 / 59<small>re-verified by refuter</small></div></div>
+    <div class="card"><div class="stat">0<small>open decisions</small></div></div>
+    <div class="card"><div class="stat">0<small>lines of code yet</small></div></div>
+  </div>
+</section>
+
+<section id="tool">
+  <h2><span class="n">A</span>Toolchain &amp; pins</h2>
+  <p class="lede">Pinned by files in the repo (<code>rust-toolchain.toml</code>, <code>.nvmrc</code>, <code>packageManager</code>) so every machine and CI runner agrees.</p>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Item</th><th>Version</th><th>Role / why</th><th>On tap</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr class="changed"><td class="pkg">Rust toolchain</td><td class="ver">1.99.0-beta.1<span class="sub">rust-toolchain.toml channel = "beta-2026-08-17" · edition 2024 · resolver 3 · rustfmt + clippy</span></td><td class="why">Beta is Rust's RC: 1.99 goes stable on 2026-10-02. Pinned to the dated channel so it doesn't float. Fallback: <code>1.98.0</code> stable. Step 0 of scaffolding installs it (<code>rustup toolchain install beta-2026-08-17</code>).</td><td class="alt">1.98.0 stable · 1.100 nightly</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">Node.js</td><td class="ver">26.7.0<span class="sub">.nvmrc = 26 · CI + local</span></td><td class="why">Current line, becomes LTS on 2026-10-28; matches your machine. Vite 8 requires <code>^20.19 || ≥22.12</code>.</td><td class="alt">24.19.0 LTS</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">pnpm</td><td class="ver">12.0.0-rc.8<span class="sub">packageManager = pnpm@12.0.0-rc.8</span></td><td class="why">Next major at RC. Your local pnpm 11.22 auto-switches to the pinned version (manage-package-manager-versions is on by default). Fallback: 11.22.0.</td><td class="alt">11.22.0 stable</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">TypeScript</td><td class="ver">7.0.2<span class="sub">native Go compiler</span></td><td class="why">~10× faster type-checks; ships as platform binaries. Fallback pin <code>6.0.3</code> if any tool's types lag (kill criterion: &gt;1 h lost).</td><td class="alt">7.1.0-dev (skipped: dev)</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr><td class="pkg">@tauri-apps/cli</td><td class="ver">2.11.4</td><td class="why"><code>pnpm tauri dev|build</code>; no global install, no cargo-tauri needed.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">cargo-nextest</td><td class="ver">0.9.143</td><td class="why">Parallel, per-test-process runner for CI; <code>cargo test</code> still works locally.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">cargo-deny</td><td class="ver">0.20.2</td><td class="why">License + RustSec advisory gate in CI (covers what cargo-audit would).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr class="changed"><td class="pkg">Biome</td><td class="ver">2.5.10</td><td class="why">Formatter + fast syntactic lint for TS/JSON/CSS. One Rust binary.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">oxlint + oxlint-tsgolint</td><td class="ver">1.79.0 + 7.0.2001<span class="sub">oxlint --type-aware</span></td><td class="why">Type-aware rules backed by typescript-go (<code>no-floating-promises</code>, <code>no-misused-promises</code>, <code>await-thenable</code>…) — the part Biome can't do yet. Lint split: Biome = format + style, oxlint = correctness/type-aware.</td><td class="alt">—</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr><td class="pkg">knip</td><td class="ver">6.32.2</td><td class="why">Finds dead exports / unused deps in the frontend.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">lefthook</td><td class="ver">2.1.10</td><td class="why">Git hooks: Biome + oxlint + <code>cargo fmt --check</code> pre-commit. Fast, no Node runtime in the hook.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">WebView2 runtime</td><td class="ver">151.0.4129.x</td><td class="why">Installed (Evergreen). The Windows installer ships the bootstrapper for machines without it.</td><td class="alt">—</td><td class="st"><span class="tag env">env</span></td></tr>
+      <tr><td class="pkg">MSVC toolchain</td><td class="ver">VS 2026 18.9.1 + VC tools</td><td class="why">Required by the <code>x86_64-pc-windows-msvc</code> target. Present.</td><td class="alt">—</td><td class="st"><span class="tag env">env</span></td></tr>
+      <tr><td class="pkg">gh CLI</td><td class="ver">2.98.0</td><td class="why">Repo create/delete, releases. Token lacks <code>delete_repo</code> — one interactive <code>gh auth refresh -s delete_repo</code> when we recreate the repo.</td><td class="alt">—</td><td class="st"><span class="tag env">env</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="ci">
+  <h2><span class="n">B</span>CI / release pipeline</h2>
+  <p class="lede">Two workflows: <code>ci.yml</code> (every push/PR) and <code>release.yml</code> (on <code>v*</code> tags). Actions pinned to major tags; exact tags recorded here.</p>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Item</th><th>Version</th><th>Role / why</th><th>On tap</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="pkg">runners</td><td class="ver">windows-latest · macos-latest · ubuntu-22.04</td><td class="why">macOS runner is Apple Silicon → build <code>universal-apple-darwin</code> (x64 + arm64 in one .dmg). Ubuntu 22.04 = Tauri's recommended glibc floor for AppImage/deb compatibility.</td><td class="alt">ubuntu-24.04</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">actions/checkout</td><td class="ver">v7 (v7.0.1)</td><td class="why">—</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr class="changed"><td class="pkg">actions/setup-node</td><td class="ver">v7 (v7.0.0)</td><td class="why"><code>node-version-file: .nvmrc</code> (→ 26), <code>cache: pnpm</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
+      <tr><td class="pkg">pnpm/action-setup</td><td class="ver">v6 (v6.0.10)</td><td class="why">Reads the RC version from <code>packageManager</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr class="changed"><td class="pkg">dtolnay/rust-toolchain</td><td class="ver">@beta<span class="sub">toolchain resolved from rust-toolchain.toml</span></td><td class="why">Installs the dated beta + clippy/rustfmt; adds <code>aarch64/x86_64-apple-darwin</code> targets on macOS. (<code>refs/heads/beta</code> confirmed.)</td><td class="alt">@1.98.0</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
+      <tr><td class="pkg">Swatinem/rust-cache</td><td class="ver">v2 (v2.9.2)</td><td class="why">Cargo registry + target cache keyed per job/OS.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-apps/tauri-action</td><td class="ver">v1 (v1.0.0)</td><td class="why">Builds bundles on the matrix and creates/uploads the GitHub Release on tag. Makes softprops/action-gh-release unnecessary.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">actions/upload-artifact</td><td class="ver">v7 (v7.0.1)</td><td class="why">PR builds expose installers as artifacts (no release).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">Linux apt deps</td><td class="ver">libwebkit2gtk-4.1-dev · libappindicator3-dev · librsvg2-dev · patchelf · build-essential · libssl-dev</td><td class="why">Tauri 2 Linux prerequisites on the Ubuntu runner.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">Playwright browsers on CI</td><td class="ver">chromium (via @playwright/test 1.62.1)</td><td class="why">Needed by Vitest Browser Mode and the flow tests; <code>pnpm exec playwright install --with-deps chromium</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">code signing</td><td class="ver">none</td><td class="why">Unsigned Win/mac builds (SmartScreen/Gatekeeper warning, normal for OSS). Updater signing keys deferred with the updater.</td><td class="alt">Authenticode · notarization</td><td class="st"><span class="tag deferred">deferred</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="core">
+  <h2><span class="n">C</span>Rust · <code>seasonvar-core</code></h2>
+  <p class="lede">The library everything else is a shell around: scrape · playlist · decode · search · download engine · export · naming · history DB. Zero Tauri dependencies.</p>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Crate</th><th>Version</th><th>Role / why</th><th>On tap</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="pkg">reqwest</td><td class="ver">0.13.4<span class="sub">default + json stream socks gzip brotli zstd</span></td><td class="why">HTTP. 0.13 defaults to <b>rustls</b> (aws-lc-rs + OS platform verifier), HTTP/2, <code>system-proxy</code>. <code>socks</code> gives SOCKS5 for the proxy feature; no native-tls/OpenSSL anywhere.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tokio</td><td class="ver">1.53.1<span class="sub">rt-multi-thread macros fs io-util sync time signal</span></td><td class="why">Async runtime; <code>Semaphore</code> bounds CDN concurrency, <code>fs</code> for segment writes.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tokio-util</td><td class="ver">0.7.19</td><td class="why"><code>CancellationToken</code> for pause/cancel per download.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tokio-stream · futures</td><td class="ver">0.1.19 · 0.3.34</td><td class="why">Progress event streams, stream combinators.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">bytes</td><td class="ver">1.12.1</td><td class="why">Zero-copy chunks from reqwest streams.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">scraper</td><td class="ver">0.27.0</td><td class="why">HTML5 DOM parsing: <code>ul.pgs-trans li[data-translate]</code>, season links (<code>&lt;h2&gt;</code>/<code>&lt;a&gt;</code> span lines — needs a real DOM, not regex), og:image, h1.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">regex</td><td class="ver">1.13.1</td><td class="why"><code>secureMark</code>, <code>pl[N] = "…"</code>, <code>/serial-(\d+)-/</code>, junk markers <code>//[A-Za-z0-9+/]+=*</code> (markers as data).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">serde · serde_json</td><td class="ver">1.0.229 · 1.0.151</td><td class="why">Playlist JSON (flat items and nested <code>{title, folder:[…]}</code> chunks), settings, history rows, IPC payloads.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">base64</td><td class="ver">0.23.1</td><td class="why">Playerjs token decode (<code>#2</code> → strip <code>//b2xvbG8=</code> → decode).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">url · percent-encoding</td><td class="ver">2.5.8 · 2.3.2</td><td class="why">Canonical URLs; <code>trans&lt;Name&gt;</code> segment with Cyrillic (e.g. <code>trans%D0%A1…</code>).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">html-escape</td><td class="ver">0.2.15</td><td class="why">Episode titles are HTML (<code>1 серия SD/FullHD&lt;br&gt;LostFilm</code>, entities).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">thiserror</td><td class="ver">2.0.20</td><td class="why">Typed error taxonomy (<code>InvalidUrl</code>, <code>SerialNotFound</code>, <code>NoSuchTranslation</code>, <code>DecodeError</code>, <code>Http</code>, <code>Io</code>…).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tracing</td><td class="ver">0.1.44</td><td class="why">Structured logs/spans; subscribers live in the binaries.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">backon</td><td class="ver">1.6.0</td><td class="why">Retry with exponential backoff + jitter for page fetches and segment downloads (simpler than reqwest-middleware stacks).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">rusqlite</td><td class="ver">0.40.2<span class="sub">bundled</span></td><td class="why">Embedded SQLite for history/library + resumable download state; same DB from CLI and GUI. Accessed via <code>spawn_blocking</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">rusqlite_migration</td><td class="ver">2.6.0</td><td class="why">Versioned schema migrations.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">jiff</td><td class="ver">0.2.35</td><td class="why">Timestamps/durations with proper time zones — the modern chrono successor. Fallback: chrono.</td><td class="alt">—</td><td class="st"><span class="tag bet">bet</span></td></tr>
+      <tr><td class="pkg">uuid</td><td class="ver">1.24.1<span class="sub">v7</span></td><td class="why">Time-ordered ids for jobs/downloads.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">sanitize-filename</td><td class="ver">0.6.0</td><td class="why">Safe file names from show titles (Cyrillic-safe, Windows-reserved names). Its 0.7.0-beta is a minor beta, not an RC of a major — stays on 0.6.</td><td class="alt">0.7.0-beta</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">directories</td><td class="ver">6.0.0</td><td class="why">Per-OS data/config dirs for the CLI (the Tauri app passes its own paths in).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">wiremock <span class="sub">dev</span></td><td class="ver">0.6.5</td><td class="why">Serves the recorded fixtures as a fake seasonvar.ru in integration tests — deterministic, offline CI.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">insta <span class="sub">dev</span></td><td class="ver">1.48.0</td><td class="why">Snapshot tests for parsed serial pages / playlists.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">proptest <span class="sub">dev</span></td><td class="ver">1.11.0</td><td class="why">Property tests for the decoder (random junk offsets, padding) and file-naming.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tempfile <span class="sub">dev</span></td><td class="ver">3.27.0</td><td class="why">Scratch dirs for download-engine tests (resume, partial files).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="cli">
+  <h2><span class="n">D</span>Rust · <code>seasonvar-cli</code></h2>
+  <p class="lede">Binary <code>seasonvar</code>: <code>info</code> · <code>links</code> · <code>search</code> · <code>download</code> · <code>export</code>. Thin over core; what CI exercises end-to-end.</p>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Crate</th><th>Version</th><th>Role / why</th><th>On tap</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="pkg">clap</td><td class="ver">4.6.6<span class="sub">derive env</span></td><td class="why">Subcommands, <code>--json</code>, <code>--proxy</code>, env overrides.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">indicatif</td><td class="ver">0.18.6</td><td class="why">Multi-bar progress + <code>HumanBytes</code>/ETA.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">owo-colors</td><td class="ver">4.3.0</td><td class="why">Terminal color, respects <code>NO_COLOR</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">dialoguer</td><td class="ver">0.12.0</td><td class="why">Interactive translation / episode pick when flags are omitted.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">anyhow</td><td class="ver">1.0.104</td><td class="why">Binary-level error context (core stays on thiserror).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tracing-subscriber</td><td class="ver">0.3.23<span class="sub">env-filter</span></td><td class="why"><code>RUST_LOG</code>-driven logging.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="tauri">
+  <h2><span class="n">E</span>Rust · Tauri app crate</h2>
+  <p class="lede">Commands + events over core, typed bindings generated for the frontend. Smallest plugin/permission surface that covers the features.</p>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Crate</th><th>Version</th><th>Role / why</th><th>On tap</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="pkg">tauri</td><td class="ver">2.11.5<span class="sub">devtools (debug) · specta</span></td><td class="why">App runtime. MSRV 1.77 ≪ our toolchain.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-build</td><td class="ver">2.6.3</td><td class="why">build.rs codegen.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-specta · specta · specta-typescript</td><td class="ver">2.0.0-rc.25 · 2.0.0-rc.25 · 0.0.12</td><td class="why">Generates TypeScript types + typed <code>commands.*</code>/<code>events.*</code> from Rust — no hand-written IPC contracts. Long-lived RC, widely used. Fallback: hand-written <code>invoke</code> wrappers validated with zod.</td><td class="alt">—</td><td class="st"><span class="tag bet">bet</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-dialog</td><td class="ver">2.7.2</td><td class="why">Native folder picker.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-opener</td><td class="ver">2.5.4</td><td class="why">Open/reveal downloaded file, open seasonvar page in browser.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-store</td><td class="ver">2.4.4</td><td class="why">Settings (download dir, concurrency, naming template, proxy).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-notification</td><td class="ver">2.3.3</td><td class="why">"Season finished downloading" toast at OS level.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-clipboard-manager</td><td class="ver">2.3.2</td><td class="why">Copy links / export script to clipboard (parity with original).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-window-state</td><td class="ver">2.4.1</td><td class="why">Remember window size/position.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-single-instance</td><td class="ver">2.4.3</td><td class="why">Second launch focuses the running app (downloads keep going).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-log</td><td class="ver">2.9.0</td><td class="why">Webview + Rust logs to a rotating file (tracing → log bridge), so bug reports have something to attach.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tracing-subscriber</td><td class="ver">0.3.23</td><td class="why">Same as CLI.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="fe">
+  <h2><span class="n">F</span>Frontend · runtime</h2>
+  <p class="lede">React 19.3 canary in the native webview. Server-state over Tauri commands with TanStack Query, typed routes for the five screens, virtualized lists for the 1,000-episode shows.</p>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Package</th><th>Version</th><th>Role / why</th><th>On tap</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr class="changed"><td class="pkg">react · react-dom</td><td class="ver">19.3.0-canary-eafeac09-20260819<span class="sub">exact pin, both packages</span></td><td class="why">Canary channel (React's RC analogue — what Next.js ships on). Adds <code>&lt;ViewTransition&gt;</code> and <code>&lt;Activity&gt;</code> alongside Actions, <code>use()</code>, <code>useOptimistic</code>. Pinned exactly; bumped deliberately. Fallback: 19.2.8 stable.</td><td class="alt">19.2.8 stable</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr><td class="pkg">@tauri-apps/api</td><td class="ver">2.11.1</td><td class="why">invoke/event/path/window. <code>@tauri-apps/api/mocks</code> powers UI tests.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">@tauri-apps/plugin-* (JS)</td><td class="ver">dialog 2.7.2 · opener 2.5.4 · store 2.4.4 · notification 2.3.3 · clipboard-manager 2.3.2 · log 2.9.0</td><td class="why">JS halves of the Rust plugins above (versions match crate-for-crate).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">@tanstack/react-query</td><td class="ver">5.101.4</td><td class="why">Caching/retry/invalidation for serial lookups, search, history — over <code>invoke</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">@tanstack/react-router · router-plugin</td><td class="ver">1.170.31 · 1.168.34</td><td class="why">Typed file-based routes: Home/Search · Serial · Downloads · Library · Settings. Search params typed (serial id, translation).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">@tanstack/react-virtual</td><td class="ver">3.14.10</td><td class="why">Episode checklists up to 1,176 rows stay 60 fps.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">zustand</td><td class="ver">5.0.15</td><td class="why">Transient UI state: selection sets, filters, queue view prefs.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">zod</td><td class="ver">4.4.3</td><td class="why">Settings + store schema validation; IPC payload guards at the boundary. (4.5 is canary of a minor — skipped.)</td><td class="alt">4.5.0-canary</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">tailwindcss · @tailwindcss/vite</td><td class="ver">4.3.3</td><td class="why">CSS-first v4 config, no PostCSS pipeline. (insiders = nightly — skipped.)</td><td class="alt">insiders</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">shadcn <span class="sub">CLI, dev</span></td><td class="ver">4.19.0</td><td class="why">Component source copied into the repo (not a dependency): button, dialog, command, checkbox, progress, tabs, toast, tooltip, scroll-area, select, input.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr class="changed"><td class="pkg">radix-ui</td><td class="ver">1.7.0-rc.1785512840124</td><td class="why">Unified primitives package shadcn 4 targets; next minor at RC. Fallback: 1.6.7.</td><td class="alt">1.6.7 stable</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr><td class="pkg">class-variance-authority · clsx · tailwind-merge · tw-animate-css</td><td class="ver">0.7.1 · 2.1.1 · 3.6.0 · 1.4.0</td><td class="why">shadcn's variant + class utilities.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">lucide-react</td><td class="ver">1.33.0</td><td class="why">Icons.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">sonner</td><td class="ver">2.0.8</td><td class="why">In-app toasts (errors, "copied").</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">cmdk</td><td class="ver">1.1.1</td><td class="why">⌘K palette wired to <code>/autocomplete.php</code> search.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">geist</td><td class="ver">1.7.2</td><td class="why">Geist Sans + Mono, self-hosted (no network fonts in a desktop app). The UI design pass may swap to <code>@fontsource-variable/inter</code> 5.3.0.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">react-error-boundary</td><td class="ver">6.1.3</td><td class="why">Per-route error boundaries with retry.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="fetool">
+  <h2><span class="n">G</span>Frontend · build, types, tests</h2>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Package</th><th>Version</th><th>Role / why</th><th>On tap</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="pkg">vite</td><td class="ver">8.2.2<span class="sub">rolldown 1.2.x</span></td><td class="why">Rolldown is the default bundler in 8 (no rollup/esbuild). Fallback: 7.3.6.</td><td class="alt">—</td><td class="st"><span class="tag bet">bet</span></td></tr>
+      <tr><td class="pkg">@vitejs/plugin-react</td><td class="ver">6.1.0<span class="sub">oxc transform</span></td><td class="why">React Fast Refresh + <b>React Compiler 1.0.0</b> (<code>babel-plugin-react-compiler</code>) enabled via plugin option; can be turned off per file (<code>"use no memo"</code>) or globally.</td><td class="alt">—</td><td class="st"><span class="tag bet">bet</span></td></tr>
+      <tr><td class="pkg">@types/react · @types/react-dom · @types/node</td><td class="ver">19.2.18 · 19.2.4 · 26.2.0</td><td class="why">Types (TS 6/7-compatible tags confirmed; 19.2 types cover the 19.3 canary's stable surface — experimental APIs get a local <code>.d.ts</code> shim if needed).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr class="changed"><td class="pkg">vitest · @vitest/coverage-v8 · @vitest/ui</td><td class="ver">5.0.0-rc.2</td><td class="why">Next major at RC. Fallback: 4.1.11 across the whole Vitest set.</td><td class="alt">4.1.11 stable</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">@vitest/browser · @vitest/browser-playwright</td><td class="ver">5.0.0-rc.2<span class="sub">Browser Mode, Chromium</span></td><td class="why">Component tests run in real Chromium via Playwright (real layout, CSS, focus). <code>expect.element</code> + <code>userEvent</code> from <code>@vitest/browser/context</code> replace jsdom + testing-library.</td><td class="alt">4.1.11 stable</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">vitest-browser-react</td><td class="ver">2.2.0<span class="sub">peer: vitest ^4 → override</span></td><td class="why"><code>render()</code> for React in Browser Mode. Declares <code>vitest ^4.0.0</code> as peer — needs <code>pnpm.peerDependencyRules.allowedVersions</code> for 5 RC. If it actually breaks: drop the whole Vitest set to 4.1.11 (Browser Mode exists there too).</td><td class="alt">—</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v2</span></td></tr>
+      <tr><td class="pkg">@playwright/test · playwright</td><td class="ver">1.62.1</td><td class="why">Flow tests against the Vite dev server with Tauri IPC mocked (<code>mockIPC</code>/<code>mockWindows</code>) — all three CI OSes; and the browser provider for Vitest. (1.63 is alpha — skipped.)</td><td class="alt">1.63.0-alpha</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">@tanstack/react-query-devtools · react-router-devtools</td><td class="ver">5.101.4 · 1.167.1</td><td class="why">Dev-only panels.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="rej">
+  <h2><span class="n">H</span>Rejected &amp; deferred</h2>
+  <p class="lede">Everything that was on the table. One line each so the reasoning survives.</p>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Item</th><th>Version</th><th>Why not (now)</th><th>On tap</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td class="pkg">Electron</td><td class="ver">43.4.1</td><td class="why">~150 MB, Chromium per app; not the modern desktop stack.</td><td class="alt">44.0.0-beta.6</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">Wails</td><td class="ver">v2.14.0 · v3 beta.12</td><td class="why">Go, and v3 still beta.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">Dioxus · Iced · GPUI · Slint</td><td class="ver">0.7.10 · 0.14.0 · 0.2.2 · 1.17.1</td><td class="why">Rust-native UI; you chose a React UI. (Dioxus 0.8 alpha is interesting — revisit in a year.)</td><td class="alt">dioxus 0.8.0-alpha.1</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">Bun</td><td class="ver">1.4.0</td><td class="why">Faster installs, but pnpm has wider Tauri/Playwright/CI parity and zero Windows edge cases.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">ESLint + typescript-eslint</td><td class="ver">10.9.0</td><td class="why">Biome + oxlint cover format, style and type-aware correctness faster.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr class="changed"><td class="pkg">Node 24 LTS</td><td class="ver">24.19.0</td><td class="why">Replaced by 26 (next LTS in October; matches your machine).</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">jsdom · happy-dom</td><td class="ver">30.0.1 · 20.11.6</td><td class="why">Browser Mode runs components in real Chromium instead.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">@testing-library/react · user-event · jest-dom</td><td class="ver">16.3.2 · 14.6.6 · 7.0.1</td><td class="why">Superseded by <code>vitest-browser-react</code> + <code>@vitest/browser/context</code> (locators, <code>expect.element</code>, real user events).</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">TS 7.1-dev · Playwright 1.63-alpha · zod 4.5-canary · Tailwind insiders · Rust nightly</td><td class="ver">dev / alpha / canary / nightly</td><td class="why">Below RC grade — outside the agreed policy.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span> <span class="tag v2">v2</span></td></tr>
+      <tr><td class="pkg">jotai</td><td class="ver">2.20.2</td><td class="why">zustand chosen; one store lib.</td><td class="alt">3.0.0-alpha.0</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">@tanstack/react-table · react-form</td><td class="ver">9.1.2 · 1.33.5</td><td class="why">YAGNI: episode list is a virtualized checklist; settings is a handful of inputs + zod.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">motion</td><td class="ver">13.1.1</td><td class="why">React 19.3 <code>&lt;ViewTransition&gt;</code> + CSS <code>@starting-style</code> first; add if the design pass needs spring physics.</td><td class="alt">—</td><td class="st"><span class="tag deferred">deferred</span></td></tr>
+      <tr><td class="pkg">effect</td><td class="ver">3.22.1</td><td class="why">Not needed; the async logic lives in Rust.</td><td class="alt">4.0.0-rc.111</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">sqlx · sea-orm · tauri-plugin-sql</td><td class="ver">0.9.0 · 2.0.2 · 2.4.0</td><td class="why">DB must be owned by core for CLI parity; rusqlite bundled is simplest and sync.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">chrono</td><td class="ver">—</td><td class="why">jiff chosen (fallback if jiff's 0.2 API bites).</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">reqwest-middleware · reqwest-retry</td><td class="ver">0.5.2 · 0.9.1</td><td class="why">backon covers retries for both HTTP and segment logic.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">governor</td><td class="ver">0.10.4</td><td class="why">Site has no rate limit; a tokio Semaphore bounds CDN concurrency.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">tokio-rusqlite</td><td class="ver">0.7.0</td><td class="why">A 20-line <code>spawn_blocking</code> wrapper is enough.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-fs · -http · -shell</td><td class="ver">2.5.1 · 2.5.9 · 2.3.5</td><td class="why">All I/O and HTTP happen in the Rust core; keeps the webview permission surface tiny.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-updater · -process</td><td class="ver">2.10.1 · 2.3.1</td><td class="why">You chose no auto-updater for v1; adding later = plugin + minisign keypair + <code>latest.json</code>.</td><td class="alt">—</td><td class="st"><span class="tag deferred">deferred</span></td></tr>
+      <tr><td class="pkg">tauri-plugin-deep-link · tray-icon · -os</td><td class="ver">2.4.9 · feature · 2.3.2</td><td class="why">Maximal-scope features (URL handler, tray, OS info).</td><td class="alt">—</td><td class="st"><span class="tag deferred">deferred</span></td></tr>
+      <tr><td class="pkg">tauri-driver (WebDriver e2e)</td><td class="ver">—</td><td class="why">Windows/Linux only, heavy runner setup. Playwright + mocked IPC first.</td><td class="alt">—</td><td class="st"><span class="tag deferred">deferred</span></td></tr>
+      <tr><td class="pkg">create-tauri-app</td><td class="ver">4.6.2</td><td class="why">Hand-built workspace instead (scaffolder assumes a single crate).</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">vite-tsconfig-paths</td><td class="ver">6.1.1</td><td class="why">Vite <code>resolve.alias</code> + tsconfig <code>paths</code> suffice.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">humansize · console · open · trash</td><td class="ver">—</td><td class="why">indicatif / owo-colors / opener already cover these.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">Next.js · TanStack Start</td><td class="ver">16.3.2 · 1.168.48</td><td class="why">No web target.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">softprops/action-gh-release · actions/cache</td><td class="ver">v3 · v6</td><td class="why">tauri-action publishes the release; rust-cache + setup-node cover caching.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">Renovate / Dependabot</td><td class="ver">—</td><td class="why">Add once the first release is out; until then the lockfiles are the pin.</td><td class="alt">—</td><td class="st"><span class="tag deferred">deferred</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="dec">
+  <h2>Decisions &amp; trade-offs</h2>
+  <div class="card tablewrap"><table>
+    <thead><tr><th>Decision</th><th>Chosen</th><th>Rejected</th><th>One line of why</th></tr></thead>
+    <tbody>
+      <tr><td class="pkg">Download engine language</td><td class="ver">Rust (core)</td><td class="alt">TypeScript in webview / sidecar</td><td class="why">Parallel range writes, resume, cancellation and backpressure belong in a systems language; also gives the CLI for free.</td></tr>
+      <tr class="changed"><td class="pkg">Pre-release policy</td><td class="ver">RC of next major/minor adopted + React canary + Rust beta</td><td class="alt">stable-only</td><td class="why">Your call: maximum edge. Below-RC builds (alpha/dev/canary-of-minor/nightly) stay out so breakage is bounded and every bet has a stable fallback.</td></tr>
+      <tr class="changed"><td class="pkg">TypeScript</td><td class="ver">7.0.2 native</td><td class="alt">6.0.3</td><td class="why">Your call: the Go compiler is the edge; fallback pin documented.</td></tr>
+      <tr class="changed"><td class="pkg">Component tests</td><td class="ver">Vitest 5 RC Browser Mode (Chromium)</td><td class="alt">jsdom</td><td class="why">Your call: real layout/focus/CSS; costs a Playwright browser on CI (already needed for flow tests).</td></tr>
+      <tr class="changed"><td class="pkg">Lint</td><td class="ver">Biome (format + style) + oxlint (type-aware)</td><td class="alt">Biome only · ESLint</td><td class="why">Your call: tsgo-backed type-aware correctness rules with Biome's formatter; two configs, both Rust-fast.</td></tr>
+      <tr><td class="pkg">Package manager</td><td class="ver">pnpm 12 RC</td><td class="alt">bun 1.4</td><td class="why">Parity with Tauri CLI / Playwright / CI on Windows; bun is faster but not more reliable here.</td></tr>
+      <tr><td class="pkg">TLS</td><td class="ver">rustls (reqwest default)</td><td class="alt">native-tls / OpenSSL</td><td class="why">Pure Rust, no OpenSSL on Linux runners, platform root store via verifier.</td></tr>
+      <tr><td class="pkg">Persistence</td><td class="ver">rusqlite bundled in core</td><td class="alt">sqlx · sea-orm · tauri-plugin-sql · JSON files</td><td class="why">Core owns data so CLI and GUI share one history; SQLite handles resume state and 10k-row libraries trivially.</td></tr>
+      <tr><td class="pkg">Routing</td><td class="ver">TanStack Router</td><td class="alt">single view + tabs</td><td class="why">Five real screens with typed params (serial id, translation, episode filters) and back/forward inside the app.</td></tr>
+      <tr><td class="pkg">UI flow e2e</td><td class="ver">Playwright + mocked IPC</td><td class="alt">tauri-driver</td><td class="why">Runs on all 3 OSes in CI in minutes; the real Tauri boundary is covered by Rust integration tests + the CLI.</td></tr>
+      <tr><td class="pkg">Time</td><td class="ver">jiff</td><td class="alt">chrono</td><td class="why">Modern API, correct zones; young but by a maintainer with a track record (regex, ripgrep). Fallback is one-file.</td></tr>
+      <tr><td class="pkg">Typed IPC</td><td class="ver">tauri-specta RC</td><td class="alt">hand-written types + zod</td><td class="why">Eliminates drift between Rust structs and TS; RC status is the accepted risk.</td></tr>
+      <tr><td class="pkg">Junk-marker handling</td><td class="ver">markers as data (regex) + recorded fixtures</td><td class="alt">hardcoded triple</td><td class="why">Every existing project hardcodes <code>//b2xvbG8=</code>; a key rotation should be a fixture update, not a rewrite.</td></tr>
+      <tr><td class="pkg">Fonts</td><td class="ver">Geist (self-hosted)</td><td class="alt">Inter variable</td><td class="why">Tentative — the UI design pass owns the final call; both are in the BOM.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="risk">
+  <h2>Risks &amp; kill criteria</h2>
+  <div class="grid2">
+    <div class="callout violet">
+      <h3>Bleeding-edge bets (each has a named fallback)</h3>
+      <ul>
+        <li><b>Rust 1.99 beta</b> regresses a crate build → <code>1.98.0</code> stable (one line in <code>rust-toolchain.toml</code>).</li>
+        <li><b>pnpm 12 RC</b> lockfile/CI glitch → 11.22.0.</li>
+        <li><b>React 19.3 canary</b> API churn → 19.2.8; we only touch <code>&lt;Activity&gt;</code>/<code>&lt;ViewTransition&gt;</code> in two places, behind tiny wrappers.</li>
+        <li><b>Vitest 5 RC + vitest-browser-react peer mismatch</b> → whole Vitest set to 4.1.11 (Browser Mode unchanged).</li>
+        <li><b>radix-ui 1.7 RC</b> breaks a shadcn component → 1.6.7.</li>
+        <li><b>TypeScript 7 native</b> breaks a tool's types → <code>6.0.3</code>. Kill criterion: more than one hour lost.</li>
+        <li><b>oxlint type-aware</b> false positives → rule-level disable; the formatter/style side (Biome) is unaffected.</li>
+        <li><b>tauri-specta RC</b> won't compile against tauri 2.11.5 → hand-written <code>invoke</code> wrappers + zod.</li>
+        <li><b>React Compiler</b> mis-memoizes → <code>"use no memo"</code> on that file, or disable globally.</li>
+        <li><b>Vite 8 / rolldown</b> plugin incompatibility → Vite 7.3.6 with identical config.</li>
+        <li><b>jiff</b> API churn → chrono. <b>macOS universal</b> build fails on the runner → arm64 only.</li>
+      </ul>
+    </div>
+    <div class="callout gold">
+      <h3>Project-level risks</h3>
+      <ul>
+        <li><b>seasonvar rotates Playerjs keys</b> → markers-as-data decoder + fixture refresh; expected, cheap.</li>
+        <li><b>Playlist endpoint moves behind auth/DRM</b> → this would end the "direct mp4" approach; kill criterion for the core pipeline (fallback: none planned in v1).</li>
+        <li><b>ubuntu-22.04 runner retired</b> → ubuntu-24.04 and document the glibc floor.</li>
+        <li><b>Repo recreation is irreversible</b> → done only at implementation start, after you run <code>gh auth refresh -s delete_repo</code>; the fork holds nothing but upstream's commits.</li>
+        <li><b>Aggregate RC risk</b>: seven pre-release pins at once. Mitigation: scaffold commit 1 proves <code>pnpm install</code> + <code>cargo build</code> + one passing test on all three OSes <em>before</em> any feature code; any bet that fails that gate is dropped to its fallback on the spot and this page is re-issued.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="verify">
+  <h2>Verification</h2>
+  <p class="lede">How these numbers were obtained, and how they stay true.</p>
+  <div class="grid2">
+    <div class="callout">
+      <h3>How each version was read</h3>
+      <ul>
+        <li>npm: <code>npm view &lt;pkg&gt; version</code> + <code>dist-tags --json</code> + <code>time</code> (publish dates) + <code>peerDependencies</code> for the RC set.</li>
+        <li>crates: <code>crates.io/api/v1/crates/&lt;crate&gt;</code> (<code>max_stable_version</code>, <code>updated_at</code>, feature flags).</li>
+        <li>tools/actions: <code>gh api repos/&lt;r&gt;/releases/latest</code> and tag/branch refs (tauri-action <code>v1</code> alias and dtolnay <code>beta</code> branch confirmed).</li>
+        <li>Rust/Node: <code>static.rust-lang.org</code> channel TOMLs (beta = 1.99.0-beta.1, 2026-08-17), <code>nodejs.org</code> release schedule (v26 LTS 2026-10-28).</li>
+        <li>First pass by one worker (59 items), then an <b>independent refuter</b> re-ran every lookup: 59/59 confirmed, 0 weakened, 0 refuted. 74 further items (plugins, test libs, actions, feature flags, RC tags) looked up by script today: <code>research/bom-extra.txt</code> + the v2 RC pass.</li>
+      </ul>
+    </div>
+    <div class="callout">
+      <h3>How they stay pinned</h3>
+      <ul>
+        <li><code>rust-toolchain.toml</code> (dated beta), <code>.nvmrc</code>, <code>packageManager</code> pin the toolchain; <code>Cargo.lock</code> and <code>pnpm-lock.yaml</code> freeze every transitive version and are committed. Pre-release pins are exact (no caret).</li>
+        <li>CI installs with <code>--frozen-lockfile</code> / <code>--locked</code>; <code>cargo deny check</code> gates advisories and licenses.</li>
+        <li>This page is re-issued (same link) if any pick changes during scaffolding — a silent substitution is the failure mode this doc exists to prevent.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer><div class="wrap">Seasonvar Downloader · rebuild of DoITCreative/SeasonvarDownloader · BOM v2 · 2026-08-21 · sources: research/stack-verify.md, research/bom-extra.txt</div></footer>
+
+<script>
+  (function () {
+    const input = document.getElementById('f'), count = document.getElementById('fc');
+    const rows = Array.from(document.querySelectorAll('section tbody tr'));
+    const sections = Array.from(document.querySelectorAll('section')).filter(s => s.querySelector('tbody'));
+    const total = rows.length;
+    function apply() {
+      const q = input.value.trim().toLowerCase();
+      let shown = 0;
+      const run = () => {
+        for (const r of rows) { const hit = !q || r.textContent.toLowerCase().includes(q); r.hidden = !hit; if (hit) shown++; }
+        for (const s of sections) { const any = Array.from(s.querySelectorAll('tbody tr')).some(r => !r.hidden); s.style.display = any ? '' : 'none'; }
+      };
+      if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(run); else run();
+      count.textContent = q ? shown + ' / ' + total : '';
+    }
+    input.addEventListener('input', apply);
+    const links = Array.from(document.querySelectorAll('nav.toc a[href^="#"]'));
+    const byId = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+    const io = new IntersectionObserver(es => {
+      for (const e of es) if (e.isIntersecting) { links.forEach(a => a.removeAttribute('aria-current')); const a = byId.get(e.target.id); if (a) a.setAttribute('aria-current', 'true'); }
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    document.querySelectorAll('main section[id]').forEach(s => io.observe(s));
+  })();
+</script>

@@ -1,0 +1,12 @@
+HEAD https://data08-cdn.11cdn.org/fi2lm/8c84f820a8d5453aab6be6ad8bed9488/7f_Its.Always.Sunny.In.Philadelphia.s18e01.HD1080p.WEBRip.Rus.RuDub.tv.v2a1.18.08.26.mp4
+HTTP/1.1 200 OK
+Content-Type: video/mp4
+Content-Length: 82170739
+Access-Control-Allow-Origin: *
+Accept-Ranges: bytes
+HEAD https://data01-cdn.11cdn.org/fi2lm/8c84f820a8d5453aab6be6ad8bed9488/7f_Elbrus.S02E08.1080.WEB-DL.x264.v2a1.17.08.26.mp4
+HTTP/1.1 200 OK
+Content-Type: video/mp4
+Content-Length: 147203648
+Access-Control-Allow-Origin: *
+Accept-Ranges: bytes
