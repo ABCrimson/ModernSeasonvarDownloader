@@ -1,0 +1,18 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-50031-0.json",
+  "count": 8,
+  "first": [
+    1,
+    1,
+    "1 серия SD/FullHD",
+    "SD/FullHD",
+    null,
+    0
+  ],
+  "last_number": 8,
+  "with_subtitles": 0
+}

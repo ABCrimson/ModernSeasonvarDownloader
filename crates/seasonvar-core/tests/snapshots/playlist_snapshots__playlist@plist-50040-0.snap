@@ -1,0 +1,18 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-50040-0.json",
+  "count": 2,
+  "first": [
+    1,
+    1,
+    "1 серия SD/FullHD RuDub",
+    "SD/FullHD",
+    "RuDub",
+    0
+  ],
+  "last_number": 2,
+  "with_subtitles": 0
+}

@@ -1,0 +1,18 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-2219-1.json",
+  "count": 10,
+  "first": [
+    1,
+    1,
+    "1 серия SD Субтитры",
+    "SD",
+    "Субтитры",
+    1
+  ],
+  "last_number": 10,
+  "with_subtitles": 10
+}

@@ -1,0 +1,18 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-22063-18.json",
+  "count": 6,
+  "first": [
+    1,
+    1,
+    "1 серия SD Amedia",
+    "SD",
+    "Amedia",
+    0
+  ],
+  "last_number": 6,
+  "with_subtitles": 0
+}

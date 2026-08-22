@@ -1,0 +1,18 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-22063-68.json",
+  "count": 4,
+  "first": [
+    1,
+    null,
+    "Фичуретка",
+    null,
+    null,
+    0
+  ],
+  "last_number": null,
+  "with_subtitles": 0
+}

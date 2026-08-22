@@ -1,0 +1,18 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-2219-0.json",
+  "count": 10,
+  "first": [
+    1,
+    1,
+    "1 серия SD/FullHD LostFilm",
+    "SD/FullHD",
+    "LostFilm",
+    0
+  ],
+  "last_number": 10,
+  "with_subtitles": 0
+}

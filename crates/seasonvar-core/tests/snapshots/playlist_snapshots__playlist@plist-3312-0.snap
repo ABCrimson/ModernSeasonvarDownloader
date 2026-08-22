@@ -1,0 +1,18 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-3312-0.json",
+  "count": 1176,
+  "first": [
+    1,
+    1,
+    "1 серия SD Persona99",
+    "SD",
+    "Persona99",
+    0
+  ],
+  "last_number": 1174,
+  "with_subtitles": 0
+}

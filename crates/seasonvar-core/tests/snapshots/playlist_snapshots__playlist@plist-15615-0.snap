@@ -1,0 +1,18 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-15615-0.json",
+  "count": 293,
+  "first": [
+    1,
+    1,
+    "1 серия SD/HD AniDub",
+    "SD/HD",
+    "AniDub",
+    0
+  ],
+  "last_number": 293,
+  "with_subtitles": 0
+}

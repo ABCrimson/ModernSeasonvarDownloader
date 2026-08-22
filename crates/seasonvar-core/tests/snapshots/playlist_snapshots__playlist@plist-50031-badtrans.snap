@@ -1,0 +1,11 @@
+---
+source: crates/seasonvar-core/tests/playlist_snapshots.rs
+expression: summary
+---
+{
+  "file": "plist-50031-badtrans.json",
+  "count": 0,
+  "first": null,
+  "last_number": null,
+  "with_subtitles": 0
+}
