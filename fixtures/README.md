@@ -7,4 +7,4 @@ Raw responses captured from seasonvar.ru on 2026-08-21/22 (client-IP-keyed `secu
 - `seasonvar/misc/` — `autocomplete-*.json`, `search-*.html`, `sub-*.vtt`, CDN HEAD transcripts, the capture script used for the audit.
 - `seasonvar/playerjs/` — the decoded `fd2` decoder from `playerjs77.js` (authoritative token algorithm) and the scripts that unpacked it.
 
-Refresh: `fixtures/capture.sh` (added in M1) re-records the same URLs; review the diff before committing — a changed marker set or playlist shape is a protocol change, not noise.
+Refresh with `fixtures/capture.sh` (re-records the same URLs); review the diff before committing — a changed marker set or playlist shape is a protocol change, not noise.
