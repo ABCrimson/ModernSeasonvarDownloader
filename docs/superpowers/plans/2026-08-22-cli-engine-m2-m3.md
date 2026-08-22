@@ -56,7 +56,7 @@ docs/superpowers/plans/2026-08-22-cli-engine-m2-m3.md   (this plan)
 
 ---
 
-## M2/M3 — Task 1: Dependencies, error/DTO contract, shared test support
+## Task 1: Dependencies, error/DTO contract, shared test support
 
 **Files:**
 - Modify: `Cargo.toml`, `crates/seasonvar-core/Cargo.toml`, `crates/seasonvar-core/src/error.rs`, `crates/seasonvar-core/src/lib.rs`
