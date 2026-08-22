@@ -140,14 +140,39 @@ fn sanitize_segment(raw: &str, os: TargetOs) -> String {
             };
         }
     }
+    // Dot segments would walk out of the base directory on any OS.
+    if s == "." || s == ".." {
+        s = "_".to_string();
+    }
     if s.len() > MAX_SEGMENT_BYTES {
-        let mut cut = MAX_SEGMENT_BYTES;
-        while !s.is_char_boundary(cut) {
-            cut -= 1;
+        // Keep a short extension (1–10 bytes, no whitespace, non-empty stem) and cut the stem instead.
+        let ext = s
+            .rsplit_once('.')
+            .filter(|(stem, ext)| {
+                !stem.is_empty()
+                    && (1..=10).contains(&ext.len())
+                    && !ext.contains(char::is_whitespace)
+            })
+            .map(|(_, ext)| ext.to_string());
+        match ext {
+            Some(ext) => {
+                truncate_at_char_boundary(&mut s, MAX_SEGMENT_BYTES - ext.len() - 1);
+                s.push('.');
+                s.push_str(&ext);
+            }
+            None => truncate_at_char_boundary(&mut s, MAX_SEGMENT_BYTES),
         }
-        s.truncate(cut);
     }
     if s.is_empty() { "_".to_string() } else { s }
+}
+
+/// Truncate `s` to at most `max` bytes without splitting a UTF-8 character.
+fn truncate_at_char_boundary(s: &mut String, max: usize) {
+    let mut cut = max;
+    while !s.is_char_boundary(cut) {
+        cut -= 1;
+    }
+    s.truncate(cut);
 }
 
 #[cfg(test)]
@@ -233,5 +258,42 @@ mod tests {
         c.translation = "///".into();
         let p = render_name(&t, &c, TargetOs::Unix);
         assert_eq!(p.to_string_lossy().replace('\\', "/"), "_/S00E00.mp4");
+    }
+
+    #[test]
+    fn dot_segments_never_escape() {
+        use std::path::Component;
+        for os in [TargetOs::Unix, TargetOs::Windows] {
+            for dots in [".", ".."] {
+                let mut c = ctx();
+                c.title = dots.into();
+                let p = render_name(&Template::new("{show}/{title}/x.mp4"), &c, os);
+                assert_eq!(
+                    p.to_string_lossy().replace('\\', "/"),
+                    "Star Trek Strange New Worlds/_/x.mp4",
+                    "{dots:?} on {os:?}"
+                );
+                assert!(
+                    !p.components()
+                        .any(|comp| matches!(comp, Component::ParentDir | Component::CurDir)),
+                    "{dots:?} on {os:?} must not yield a `.`/`..` component"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn cap_keeps_extension() {
+        let mut c = ctx();
+        c.show = "x".repeat(400);
+        let p = render_name(&Template::new("{show}.mp4"), &c, TargetOs::Unix);
+        let name = p.to_string_lossy().into_owned();
+        assert!(name.ends_with(".mp4"), "extension kept: {name}");
+        assert!(
+            name.len() <= MAX_SEGMENT_BYTES,
+            "byte length {}",
+            name.len()
+        );
+        assert_eq!(name, format!("{}.mp4", "x".repeat(196)));
     }
 }
