@@ -1,19 +1,39 @@
-//! `seasonvar` — CLI front end. Subcommands arrive in Plan 2; this binary only knows `--version`.
+//! `seasonvar` — CLI front end over `seasonvar-core`.
+mod cli;
+mod commands;
+mod context;
+mod output;
+
 use clap::Parser;
 
-#[derive(Parser, Debug)]
-#[command(name = "seasonvar", version, about = "Download shows from seasonvar.ru", long_about = None)]
-struct Cli {}
-
-fn main() -> anyhow::Result<()> {
+fn main() {
+    let cli = cli::Cli::parse();
+    let level = if cli.globals.quiet {
+        "error"
+    } else {
+        match cli.globals.verbose {
+            0 => "warn",
+            1 => "info",
+            2 => "debug",
+            _ => "trace",
+        }
+    };
     tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .with_env_filter(
+            tracing_subscriber::EnvFilter::try_from_default_env()
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new(level)),
+        )
         .with_writer(std::io::stderr)
         .init();
-    let _cli = Cli::parse();
-    println!(
-        "seasonvar {} — commands arrive in the next milestone",
-        seasonvar_core::VERSION
-    );
-    Ok(())
+    let json = cli.globals.json;
+    let rt = tokio::runtime::Runtime::new().expect("tokio runtime");
+    let code = match rt.block_on(commands::run(cli)) {
+        Ok(()) => 0,
+        Err(e) => {
+            output::emit_error(&e, json);
+            output::exit_code(&e)
+        }
+    };
+    drop(rt);
+    std::process::exit(code);
 }

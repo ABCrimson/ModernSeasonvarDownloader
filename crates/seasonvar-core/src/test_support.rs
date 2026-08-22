@@ -169,3 +169,14 @@ pub async fn mount_cdn(
         .await;
     url::Url::parse(&format!("{}{}", server.uri(), path)).unwrap()
 }
+
+/// Mount `/autocomplete.php?query=<query>` from `fixtures/seasonvar/misc/<fixture>`.
+pub async fn mount_autocomplete(server: &MockServer, query: &str, fixture: &str) {
+    let body = read_fixture(&format!("misc/{fixture}"));
+    Mock::given(method("GET"))
+        .and(path("/autocomplete.php"))
+        .and(wiremock::matchers::query_param("query", query))
+        .respond_with(ResponseTemplate::new(200).set_body_raw(body, "application/json"))
+        .mount(server)
+        .await;
+}
