@@ -3131,11 +3131,13 @@ fn value_to_u32(v: &Value) -> Option<u32> {
 pub fn parse_autocomplete(body: &str, base: &Url) -> Result<Vec<SearchHit>> {
     let raw: RawAutocomplete = serde_json::from_str(body).map_err(|e| CoreError::Protocol(format!("autocomplete is not valid JSON: {e}")))?;
     let mut hits = Vec::with_capacity(raw.data.len());
-    for (i, path) in raw.data.iter().enumerate() {
+    for (i, raw_path) in raw.data.iter().enumerate() {
         let Some(id) = raw.id.get(i).and_then(value_to_u32) else { continue };
+        // The site returns `serial-…html` without a leading slash; store paths as absolute.
+        let path = if raw_path.starts_with('/') { raw_path.clone() } else { format!("/{raw_path}") };
         let title = raw.suggestions.valu.get(i).map(|t| t.split_whitespace().collect::<Vec<_>>().join(" ")).unwrap_or_else(|| path.clone());
-        let Ok(url) = base.join(path) else { continue };
-        hits.push(SearchHit { id, title, path: path.clone(), url });
+        let Ok(url) = base.join(&path) else { continue };
+        hits.push(SearchHit { id, title, path, url });
     }
     Ok(hits)
 }
