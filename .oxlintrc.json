@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "import", "unicorn", "oxc", "promise", "vitest"],
+  "categories": { "correctness": "error", "suspicious": "warn", "perf": "warn" },
+  "rules": {
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "typescript/await-thenable": "error",
+    "typescript/no-unnecessary-type-assertion": "warn",
+    "unicorn/filename-case": "off"
+  },
+  "ignorePatterns": [
+    "**/dist/**",
+    "**/node_modules/**",
+    "**/src/bindings.ts",
+    "**/src/routeTree.gen.ts",
+    "**/target/**",
+    "**/src-tauri/**"
+  ]
+}

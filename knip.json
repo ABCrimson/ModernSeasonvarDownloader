@@ -1,0 +1,52 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": [],
+      "project": [],
+      "ignoreDependencies": ["oxlint-tsgolint", "lefthook"]
+    },
+    "apps/desktop": {
+      "entry": [
+        "src/main.tsx",
+        "src/routes/**/*.tsx",
+        "e2e/**/*.ts",
+        "vite.config.ts",
+        "vitest.config.ts",
+        "playwright.config.ts",
+        "src/test/setup.ts",
+        "src/components/ui/**/*.tsx"
+      ],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["src/bindings.ts", "src/routeTree.gen.ts", "src/components/ui/**"],
+      "ignoreDependencies": [
+        "oxc-transform-react",
+        "@vitest/browser",
+        "@vitest/coverage-v8",
+        "@vitest/ui",
+        "playwright",
+        "tw-animate-css",
+        "@fontsource-variable/inter",
+        "@tauri-apps/cli",
+        "@tanstack/react-virtual",
+        "@tauri-apps/api",
+        "@tauri-apps/plugin-clipboard-manager",
+        "@tauri-apps/plugin-dialog",
+        "@tauri-apps/plugin-log",
+        "@tauri-apps/plugin-notification",
+        "@tauri-apps/plugin-opener",
+        "@tauri-apps/plugin-store",
+        "cmdk",
+        "lucide-react",
+        "react-error-boundary",
+        "sonner",
+        "zod",
+        "zustand",
+        "@tanstack/react-query-devtools",
+        "@tanstack/react-router-devtools",
+        "shadcn",
+        "tailwindcss"
+      ]
+    }
+  }
+}

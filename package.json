@@ -1,0 +1,29 @@
+{
+  "name": "modern-seasonvar-downloader",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@12.0.0-rc.8",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "prepare": "lefthook install",
+    "dev": "pnpm --filter seasonvar-desktop dev",
+    "build": "pnpm --filter seasonvar-desktop build",
+    "tauri": "pnpm --filter seasonvar-desktop tauri",
+    "test": "pnpm --filter seasonvar-desktop test",
+    "e2e": "pnpm --filter seasonvar-desktop e2e",
+    "typecheck": "pnpm --filter seasonvar-desktop typecheck",
+    "lint": "biome check . && oxlint --type-aware --tsconfig apps/desktop/tsconfig.json apps/desktop",
+    "lint:fix": "biome check --write . && oxlint --type-aware --tsconfig apps/desktop/tsconfig.json --fix apps/desktop",
+    "knip": "knip"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.10",
+    "knip": "6.32.2",
+    "lefthook": "2.1.10",
+    "oxlint": "1.79.0",
+    "oxlint-tsgolint": "7.0.2001",
+    "typescript": "7.0.2"
+  }
+}

@@ -1,0 +1,13 @@
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: '*.{ts,tsx,js,mjs,json,css}'
+      run: pnpm exec biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
+    oxlint:
+      glob: 'apps/desktop/**/*.{ts,tsx}'
+      run: pnpm exec oxlint --type-aware --tsconfig apps/desktop/tsconfig.json {staged_files}
+    rustfmt:
+      glob: '*.rs'
+      run: cargo fmt --all --check
