@@ -1,10 +1,14 @@
 //! The one HTTP client: browser-like UA, timeout, optional proxy, retry with backoff. `base_url` is injectable for tests.
+//! Media streaming ([`Client::probe`] / [`Client::get_stream`]) shares the UA, proxy and connect timeout;
+//! only the total request deadline is lifted for bodies that stream for minutes.
 use std::fmt;
+use std::pin::Pin;
 use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 
 use backon::{ExponentialBuilder, Retryable};
+use futures::{Stream, StreamExt, TryStreamExt};
 use reqwest::header;
 use serde::{Deserialize, Serialize};
 use url::Url;
@@ -105,6 +109,8 @@ impl From<Proxy> for String {
 pub struct ClientConfig {
     pub base_url: Url,
     pub proxy: Proxy,
+    /// Total deadline for a site request (connect → last body byte). Does not bound
+    /// [`Client::get_stream`] bodies — those are bounded per chunk by its `read_timeout`.
     pub timeout: Duration,
     pub user_agent: String,
     pub markers: MarkerSet,
@@ -125,9 +131,44 @@ impl Default for ClientConfig {
     }
 }
 
+/// What a `Range: bytes=0-0` probe learned about a media URL.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Probe {
+    /// Full size in bytes (`Content-Range` total on 206, `Content-Length` on 200), when known.
+    pub total: Option<u64>,
+    /// The server honored the byte range (answered 206).
+    pub accept_ranges: bool,
+    pub etag: Option<String>,
+    pub last_modified: Option<String>,
+    pub content_type: Option<String>,
+}
+
+/// A streaming HTTP body (one segment or the whole file).
+pub struct ByteStream {
+    /// HTTP status of the response (`206` for a honored range, `200` otherwise).
+    pub status: u16,
+    /// Length of *this* body (the segment, not the whole file), when the server sent it.
+    pub content_length: Option<u64>,
+    /// The chunks; ends after the first `Err` (a stalled read is [`CoreError::Timeout`]).
+    pub body: Pin<Box<dyn Stream<Item = Result<bytes::Bytes>> + Send>>,
+}
+
+impl fmt::Debug for ByteStream {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ByteStream")
+            .field("status", &self.status)
+            .field("content_length", &self.content_length)
+            .finish_non_exhaustive()
+    }
+}
+
 #[derive(Clone)]
 pub struct Client {
+    /// Site requests: `ClientConfig::timeout` is a total deadline (connect → last body byte).
     http: reqwest::Client,
+    /// Media streams: same UA/proxy/connect timeout but no total deadline — a segment body may
+    /// take minutes; [`Client::get_stream`] bounds every wait with its per-chunk `read_timeout`.
+    cdn: reqwest::Client,
     config: Arc<ClientConfig>,
 }
 
@@ -141,17 +182,19 @@ impl fmt::Debug for Client {
 
 impl Client {
     pub fn new(config: ClientConfig) -> Result<Client> {
-        let mut builder = reqwest::Client::builder()
-            .user_agent(config.user_agent.clone())
-            .timeout(config.timeout)
-            .connect_timeout(Duration::from_secs(10));
-        builder = match &config.proxy {
-            Proxy::None => builder.no_proxy(),
-            Proxy::System => builder,
-            Proxy::Http(u) | Proxy::Socks5(u) => builder.proxy(reqwest::Proxy::all(u.clone())?),
+        let base = || -> Result<reqwest::ClientBuilder> {
+            let builder = reqwest::Client::builder()
+                .user_agent(config.user_agent.clone())
+                .connect_timeout(Duration::from_secs(10));
+            Ok(match &config.proxy {
+                Proxy::None => builder.no_proxy(),
+                Proxy::System => builder,
+                Proxy::Http(u) | Proxy::Socks5(u) => builder.proxy(reqwest::Proxy::all(u.clone())?),
+            })
         };
         Ok(Client {
-            http: builder.build()?,
+            http: base()?.timeout(config.timeout).build()?,
+            cdn: base()?.build()?,
             config: Arc::new(config),
         })
     }
@@ -178,13 +221,7 @@ impl Client {
     pub async fn get_bytes(&self, url: Url) -> Result<bytes::Bytes> {
         let attempt = || async { self.try_get(url.clone()).await };
         attempt
-            .retry(
-                ExponentialBuilder::default()
-                    .with_min_delay(Duration::from_millis(250))
-                    .with_max_delay(Duration::from_secs(5))
-                    .with_max_times(self.config.retries)
-                    .with_jitter(),
-            )
+            .retry(self.backoff())
             .when(is_retryable)
             .notify(|err, delay| {
                 tracing::warn!(
@@ -194,6 +231,117 @@ impl Client {
                 )
             })
             .await
+    }
+
+    /// `GET` with `Range: bytes=0-0`: 206 → ranged (total from `Content-Range`), 200 → not
+    /// ranged (total from `Content-Length`); other statuses are [`CoreError::Http`]. Retries
+    /// network errors, 429 and 5xx like [`Client::get_bytes`]. The body is never read.
+    pub async fn probe(&self, url: &Url) -> Result<Probe> {
+        let attempt = || async { self.try_probe(url.clone()).await };
+        attempt
+            .retry(self.backoff())
+            .when(is_retryable)
+            .notify(|err, delay| {
+                tracing::warn!(
+                    error = %err,
+                    delay_ms = delay.as_millis() as u64,
+                    "retrying probe"
+                )
+            })
+            .await
+    }
+
+    async fn try_probe(&self, url: Url) -> Result<Probe> {
+        let resp = self
+            .http
+            .get(url.clone())
+            .header(header::ACCEPT, "*/*")
+            .header(header::RANGE, "bytes=0-0")
+            .send()
+            .await?;
+        let status = resp.status();
+        if !status.is_success() {
+            return Err(CoreError::Http {
+                status: status.as_u16(),
+                url,
+            });
+        }
+        let accept_ranges = status == reqwest::StatusCode::PARTIAL_CONTENT;
+        let total = if accept_ranges {
+            header_str(&resp, "content-range")
+                .and_then(|cr| cr.rsplit('/').next().and_then(|t| t.trim().parse().ok()))
+        } else {
+            resp.content_length()
+        };
+        Ok(Probe {
+            total,
+            accept_ranges,
+            etag: header_str(&resp, "etag"),
+            last_modified: header_str(&resp, "last-modified"),
+            content_type: header_str(&resp, "content-type"),
+        })
+    }
+
+    /// Stream a body — optionally the byte range `start..=end` (`end = None` = to EOF).
+    ///
+    /// No automatic retry: callers (the engine, per segment) retry. A `range` answered with
+    /// anything but 206 is [`CoreError::Protocol`] ("server ignored the Range header"); HTTP
+    /// errors are [`CoreError::Http`] (416 included). `read_timeout` bounds the wait for the
+    /// response headers and then every chunk; a stall yields [`CoreError::Timeout`] and ends
+    /// the stream. `ClientConfig::timeout` does not apply — a body may stream for minutes.
+    pub async fn get_stream(
+        &self,
+        url: &Url,
+        range: Option<(u64, Option<u64>)>,
+        read_timeout: Duration,
+    ) -> Result<ByteStream> {
+        let mut req = self.cdn.get(url.clone()).header(header::ACCEPT, "*/*");
+        if let Some((start, end)) = range {
+            let value = match end {
+                Some(e) => format!("bytes={start}-{e}"),
+                None => format!("bytes={start}-"),
+            };
+            req = req.header(header::RANGE, value);
+        }
+        let resp = tokio::time::timeout(read_timeout, req.send())
+            .await
+            .map_err(|_| stalled(read_timeout))??;
+        let status = resp.status().as_u16();
+        if !(200..300).contains(&status) {
+            return Err(CoreError::Http {
+                status,
+                url: url.clone(),
+            });
+        }
+        if range.is_some() && status != 206 {
+            return Err(CoreError::Protocol(format!(
+                "server ignored the Range header for {url} (HTTP {status})"
+            )));
+        }
+        let content_length = resp.content_length();
+        let chunks = Box::pin(resp.bytes_stream().map_err(CoreError::from));
+        // `None` state = finished (EOF or a timeout already reported): the stream is fused.
+        let timed = futures::stream::unfold(Some(chunks), move |state| async move {
+            let mut chunks = state?;
+            match tokio::time::timeout(read_timeout, chunks.next()).await {
+                Ok(Some(item)) => Some((item, Some(chunks))),
+                Ok(None) => None,
+                Err(_) => Some((Err(stalled(read_timeout)), None)),
+            }
+        });
+        Ok(ByteStream {
+            status,
+            content_length,
+            body: Box::pin(timed),
+        })
+    }
+
+    fn backoff(&self) -> ExponentialBuilder {
+        ExponentialBuilder::default()
+            .with_min_delay(Duration::from_millis(250))
+            .with_max_delay(Duration::from_secs(5))
+            .with_max_times(self.config.retries)
+            .with_jitter()
     }
 
     async fn try_get(&self, url: Url) -> Result<bytes::Bytes> {
@@ -214,10 +362,22 @@ impl Client {
     }
 }
 
+fn header_str(resp: &reqwest::Response, name: &str) -> Option<String> {
+    resp.headers()
+        .get(name)
+        .and_then(|v| v.to_str().ok())
+        .map(str::to_string)
+}
+
+fn stalled(read_timeout: Duration) -> CoreError {
+    CoreError::Timeout(format!("no data received for {read_timeout:?}"))
+}
+
 fn is_retryable(err: &CoreError) -> bool {
     match err {
         CoreError::Http { status, .. } => *status == 429 || *status >= 500,
         CoreError::Network(e) => !e.is_builder() && !e.is_redirect(),
+        CoreError::Timeout(_) => true,
         _ => false,
     }
 }

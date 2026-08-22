@@ -26,6 +26,9 @@ pub enum CoreError {
     Http { status: u16, url: Url },
     #[error("network error: {0}")]
     Network(#[from] reqwest::Error),
+    /// A stream stalled: no data arrived within the read timeout (`Client::get_stream`).
+    #[error("timed out: {0}")]
+    Timeout(String),
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error("database error: {0}")]
@@ -52,6 +55,7 @@ impl CoreError {
             CoreError::Decode(_) => "decode",
             CoreError::Http { .. } => "http",
             CoreError::Network(_) => "network",
+            CoreError::Timeout(_) => "timeout",
             CoreError::Io(_) => "io",
             CoreError::Db(_) => "db",
             CoreError::DbLocked { .. } => "db_locked",
@@ -93,6 +97,9 @@ impl CoreError {
             }
             CoreError::Network(e) if e.is_connect() => {
                 Some("Could not connect. Check your connection or proxy.")
+            }
+            CoreError::Timeout(_) => {
+                Some("The connection stalled. Check your network or proxy and retry.")
             }
             CoreError::Db(_) => Some(
                 "The local library database failed. A backup (seasonvar.db.bak) is kept next to it; see the logs.",
@@ -148,6 +155,14 @@ mod tests {
         assert_eq!(e.kind(), "db_locked");
         assert!(e.hint().unwrap().contains("desktop app"));
         assert!(e.to_string().contains("seasonvar.db"));
+    }
+
+    #[test]
+    fn timeout_has_kind_and_hint() {
+        let e = CoreError::Timeout("no data received for 30s".into());
+        assert_eq!(e.kind(), "timeout");
+        assert!(e.hint().unwrap().contains("stalled"));
+        assert_eq!(e.to_string(), "timed out: no data received for 30s");
     }
 
     #[test]
