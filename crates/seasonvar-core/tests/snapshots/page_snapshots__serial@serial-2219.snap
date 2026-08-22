@@ -1,0 +1,96 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 2219,
+  "slug": "-He_vse_starki_umrut----_psxskbl-00001---sezon",
+  "url": "https://seasonvar.ru/serial-2219--He_vse_starki_umrut----_psxskbl-00001---sezon.html",
+  "title": {
+    "ru": "Игра престолов",
+    "en": "Game of Thrones"
+  },
+  "season_number": 1,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/2219.jpg",
+  "description": "Сюжет первого эпизода многосерийного проекта Игра престолов основан на произведении Песнь Льда и Огня Джорджа Мартина. Неду Старку поступает предложение стать старшим советником правителя Роберта Баратеона  занять должность Десницы. Также Неду и его супруге стало известно о том, что конкуренты - Дом Ланнистеров, с которым в родственной связи состоит супруга короля, виновен в гибели бывшего главного советника. Нед намерен выяснить, кто виновен в гибели Десницы. Однако чем больше он вникает в эту историю, тем яснее понимает, что у Ланнистеров очень много секретов, которые они тщательно скрывают",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/2219/plist.txt?time=1787366844",
+      "share_percent": 95.9
+    },
+    {
+      "id": 1,
+      "name": "Субтитры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A1%D1%83%D0%B1%D1%82%D0%B8%D1%82%D1%80%D1%8B/2219/plist.txt?time=1787366844",
+      "share_percent": 3.92
+    },
+    {
+      "id": 68,
+      "name": "Трейлеры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A2%D1%80%D0%B5%D0%B9%D0%BB%D0%B5%D1%80%D1%8B/2219/plist.txt?time=1787366844",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 2219,
+      "url": "https://seasonvar.ru/serial-2219--He_vse_starki_umrut----_psxskbl-00001---sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 1 сезон",
+      "current": true,
+      "note": null
+    },
+    {
+      "id": 3991,
+      "url": "https://seasonvar.ru/serial-3991-Vse_starki_umrut_psfnisz-00002-sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 2 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 6675,
+      "url": "https://seasonvar.ru/serial-6675-Vse_starki_umrut--_pshytbq-00003--sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 3 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 8676,
+      "url": "https://seasonvar.ru/serial-8676-Igra__prestolov---_pslqjsw-4---sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 4 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 11242,
+      "url": "https://seasonvar.ru/serial-11242-Jon_Snow_umret--_pschiyr-5---sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 5 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 13535,
+      "url": "https://seasonvar.ru/serial-13535-Jon_Snow_voskresnet_psspnjz-000006-sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 6 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 15557,
+      "url": "https://seasonvar.ru/serial-15557--Igra_prestoloB-----_psckgol-7-----sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 7 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 22063,
+      "url": "https://seasonvar.ru/serial-22063-Igra_prestolov--_psjfuiw-00008---sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 8 сезон",
+      "current": false,
+      "note": null
+    }
+  ],
+  "fetched_at": "[ts]"
+}

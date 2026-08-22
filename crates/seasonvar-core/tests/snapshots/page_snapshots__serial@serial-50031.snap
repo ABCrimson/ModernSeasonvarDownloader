@@ -1,0 +1,42 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 50031,
+  "slug": "El_brus-2-season",
+  "url": "https://seasonvar.ru/serial-50031-El_brus-2-season.html",
+  "title": {
+    "ru": "Эльбрус",
+    "en": null
+  },
+  "season_number": 2,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/50031.jpg",
+  "description": "Эльбрус - умный и хорошо подготовленный пес-спасатель породы золотистый ретривер. Он - нос и уши одноименного спасательного отряда, работающего в предгорье Кавказа. Его хозяин - бывший военный и спасатель Виктор. Его лучшие друзья, дети Виктора, 20-летние двойняшки Иван и Катя. Вместе с другом семьи Асланом они приходят на помощь альпинистам, сноубордистам и прочим экстремалам, попавшим в беду. Боевые навыки Виктора также помогают искать в горах беглых преступников, похищенных детей и других героев криминальных историй.",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/50031/plist.txt?time=1787367152",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 46367,
+      "url": "https://seasonvar.ru/serial-46367-El_brus.html",
+      "label": "Сериал Эльбрус 1 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 50031,
+      "url": "https://seasonvar.ru/serial-50031-El_brus-2-season.html",
+      "label": "Сериал Эльбрус 2 сезон",
+      "current": true,
+      "note": "(17.08.2026 1-8 серия из 32)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}

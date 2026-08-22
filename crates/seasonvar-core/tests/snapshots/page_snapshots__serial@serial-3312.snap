@@ -1,0 +1,35 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 3312,
+  "slug": "-VanPis-_pslsbjw-000--sezon",
+  "url": "https://seasonvar.ru/serial-3312--VanPis-_pslsbjw-000--sezon.html",
+  "title": {
+    "ru": "Ван-Пис",
+    "en": "One Piece"
+  },
+  "season_number": null,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/3312.jpg",
+  "description": "Данное аниме переносит нас в то время ,когда пиратство было модно, распространено и считалось не плохим делом. Именно в эту эпоху многие грезили кладами, сокровищами и золотом ,многие только об этом говорили ,но ведь были  и те ,кто сумел преуспеть в этом деле. Ведь только этим людям было подвластно море, в чьих глубинах хранились несметные богатства. Поэтому, пираты бороздя просторы постоянно сражались между собой,  пытаясь раздобыть удивительные и несметные сокровища ,которые назывались ван-пис. Это был действительно невероятный клад, который очень долгие годы собирал легендарный и очень отв",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/3312/plist.txt?time=1787366728",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 3312,
+      "url": "https://seasonvar.ru/serial-3312--VanPis-_pslsbjw-000--sezon.html",
+      "label": "Сериал Ван-Пис/One Piece",
+      "current": true,
+      "note": "(17.08.2026 1174 серия из ??)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}

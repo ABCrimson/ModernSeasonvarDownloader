@@ -1,0 +1,104 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 394,
+  "slug": "Druz_ya_pssfyid-01-sezon",
+  "url": "https://seasonvar.ru/serial-394-Druz_ya_pssfyid-01-sezon.html",
+  "title": {
+    "ru": "Друзья",
+    "en": "Friends"
+  },
+  "season_number": 1,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/394.jpg",
+  "description": "Сериал Друзья повествует нам о жизнерадостной и полной обаяния американской молодежи. Легкомысленная девушка Рейчел красавица и модница Моника, у которой не складываются отношения с молодыми людьми озорной весельчак Чандлер, добрая и сострадательная Фиби мечта девушек Джоуи, который в своих мечтах возомнил себя знаменитостью обладающий высоким  Росс Жизнь ребят полна ярких впечатлений: любовь и страсти наполняют их каждый день. Поиски работы, влюбленность, размолвки, недостаток денег, связывание себя узами брака - вот что происходит у простых американских ребят. Интересные приключения продолжа",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/394/plist.txt?time=1787366729",
+      "share_percent": 84.63
+    },
+    {
+      "id": 1,
+      "name": "Субтитры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A1%D1%83%D0%B1%D1%82%D0%B8%D1%82%D1%80%D1%8B/394/plist.txt?time=1787366729",
+      "share_percent": 15.37
+    }
+  ],
+  "seasons": [
+    {
+      "id": 394,
+      "url": "https://seasonvar.ru/serial-394-Druz_ya_pssfyid-01-sezon.html",
+      "label": "Сериал Друзья/Friends 1 сезон",
+      "current": true,
+      "note": null
+    },
+    {
+      "id": 412,
+      "url": "https://seasonvar.ru/serial-412-Druz_ya_psvzkyu-2-sezon.html",
+      "label": "Сериал Друзья/Friends 2 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 425,
+      "url": "https://seasonvar.ru/serial-425-Druz_ya_psmnfet-3-sezon.html",
+      "label": "Сериал Друзья/Friends 3 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 439,
+      "url": "https://seasonvar.ru/serial-439-Druz_ya_psgxakm-4-sezon.html",
+      "label": "Сериал Друзья/Friends 4 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 442,
+      "url": "https://seasonvar.ru/serial-442-Druz_ya_psxsmrd-5-sezon.html",
+      "label": "Сериал Друзья/Friends 5 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 446,
+      "url": "https://seasonvar.ru/serial-446-Druz_ya_psctlko-6-season.html",
+      "label": "Сериал Друзья/Friends 6 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 450,
+      "url": "https://seasonvar.ru/serial-450-Druz_ya_psagdbh-7-sezon.html",
+      "label": "Сериал Друзья/Friends 7 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 458,
+      "url": "https://seasonvar.ru/serial-458-Druz_ya_psjbkzc-8-sezon.html",
+      "label": "Сериал Друзья/Friends 8 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 466,
+      "url": "https://seasonvar.ru/serial-466-Druz_ya_psrlyzn-9-sezon.html",
+      "label": "Сериал Друзья/Friends 9 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 492,
+      "url": "https://seasonvar.ru/serial-492-Druz_ya_pswhqgz-10-sezon.html",
+      "label": "Сериал Друзья/Friends 10 сезон",
+      "current": false,
+      "note": null
+    }
+  ],
+  "fetched_at": "[ts]"
+}

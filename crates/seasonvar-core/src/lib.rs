@@ -4,12 +4,14 @@ pub mod client;
 pub mod decode;
 pub mod error;
 pub mod model;
+pub mod page;
 pub mod source;
 
 pub use client::{Client, ClientConfig, DEFAULT_USER_AGENT, Proxy};
 pub use decode::{MarkerSet, decode_token};
 pub use error::{CoreError, DecodeError, Result};
 pub use model::*;
+pub use page::{ZERO_MARK, default_playlist_path, parse_serial_page};
 pub use source::{SITE, SerialUrl, Source};
 
 /// Crate version, single-sourced from the workspace `Cargo.toml`.

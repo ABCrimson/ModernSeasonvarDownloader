@@ -1,0 +1,74 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 46176,
+  "slug": "Zvezdnyj_put__Strannye_novye_miry-4-season",
+  "url": "https://seasonvar.ru/serial-46176-Zvezdnyj_put__Strannye_novye_miry-4-season.html",
+  "title": {
+    "ru": "Звездный путь: Странные новые миры",
+    "en": "Star Trek: Strange New Worlds"
+  },
+  "season_number": 4,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/46176.jpg",
+  "description": "В  вихре событий, предшествующих знаменитым приключениям Звездного пути, разворачивается волнующая лента сюжета. Отправляясь в девятнадцатый рейс, первый экипаж  Энтерпрайз -1701 во главе с капитаном Кристофером Пайком, мистером Споком и загадочной Номер один, вступает в возможно самое опасное путешествие своей жизни - в поисках таинственных уголков галактики, пока еще не разгаданных кем-либо. Слежу за капитаном Пайком, преданным вторым пилотом Номер один и умным, но вечно колеблющимся мистером Споком  они представляют собой элиту научно-исследовательского корабля. Этот функциональный треуголь",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/46176/plist.txt?time=1787366577",
+      "share_percent": 72.39
+    },
+    {
+      "id": 1,
+      "name": "Субтитры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A1%D1%83%D0%B1%D1%82%D0%B8%D1%82%D1%80%D1%8B/46176/plist.txt?time=1787366577",
+      "share_percent": 2.92
+    },
+    {
+      "id": 2,
+      "name": "LostFilm",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/transLostFilm/46176/plist.txt?time=1787366577",
+      "share_percent": 15.04
+    },
+    {
+      "id": 68,
+      "name": "Трейлеры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A2%D1%80%D0%B5%D0%B9%D0%BB%D0%B5%D1%80%D1%8B/46176/plist.txt?time=1787366577",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 32140,
+      "url": "https://seasonvar.ru/serial-32140-Zvezdnyj_put__Strannye_novye_miry_psftdoj.html",
+      "label": "Сериал Звездный путь: Странные новые миры/Star Trek: Strange New Worlds 1 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 36192,
+      "url": "https://seasonvar.ru/serial-36192-Zvezdnyj_put__Strannye_novye_miry_pscamhd-2-season.html",
+      "label": "Сериал Звездный путь: Странные новые миры/Star Trek: Strange New Worlds 2 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 41168,
+      "url": "https://seasonvar.ru/serial-41168-Zvezdnyj_put__Strannye_novye_miry_psexswp-3-season.html",
+      "label": "Сериал Звездный путь: Странные новые миры/Star Trek: Strange New Worlds 3 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 46176,
+      "url": "https://seasonvar.ru/serial-46176-Zvezdnyj_put__Strannye_novye_miry-4-season.html",
+      "label": "Сериал Звездный путь: Странные новые миры/Star Trek: Strange New Worlds 4 сезон",
+      "current": true,
+      "note": "(21.08.2026 5 серия (Субтитры) из 10)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}

@@ -1,0 +1,118 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 10729,
+  "slug": "25_cheloveka_psivucf-012-sezon",
+  "url": "https://seasonvar.ru/serial-10729-25_cheloveka_psivucf-012-sezon.html",
+  "title": {
+    "ru": "2,5 человека",
+    "en": "Two and a Half Men"
+  },
+  "season_number": 12,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/10729.jpg",
+  "description": "В одном доме живут три человека. Это братья, Чарли и Алан. Они воспитывают Джейка. Иногда эти взрослые люди сами ведут себя как дети. Чарли - бабник и пьяница, заботящийся о своей независимости. Алан предпочитает сидеть дома, он недавно развелся и страдает. Джейк становится учеником в колледже. Джейк уезжает из дома, братья остаются вдвоем. Но неожиданно в их доме появляется Дженнифер Харпер  это дочь Чарли. Она точная копия своего отца, только в женском варианте. Плюс ко всему она имеет нетрадиционную сексуальную ориентацию. Дженнифер - лесбиянка. Сможет ли она заменить Джейка 10Жизнь семейст",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/10729/plist.txt?time=1787366581",
+      "share_percent": 99.89
+    },
+    {
+      "id": 68,
+      "name": "Трейлеры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A2%D1%80%D0%B5%D0%B9%D0%BB%D0%B5%D1%80%D1%8B/10729/plist.txt?time=1787366581",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 472,
+      "url": "https://seasonvar.ru/serial-472-25_cheloveka_psulxgq-1-season.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 1 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 481,
+      "url": "https://seasonvar.ru/serial-481-25_cheloveka_pshfkrj-002-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 2 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 493,
+      "url": "https://seasonvar.ru/serial-493-25_cheloveka_pscpkmo-3-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 3 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 526,
+      "url": "https://seasonvar.ru/serial-526-25_cheloveka_psirwoe-004-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 4 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 545,
+      "url": "https://seasonvar.ru/serial-545-25_cheloveka_psredbh-005-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 5 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 608,
+      "url": "https://seasonvar.ru/serial-608--25_cheloveka-006-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 6 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 726,
+      "url": "https://seasonvar.ru/serial-726--25_cheloveka-007-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 7 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 1553,
+      "url": "https://seasonvar.ru/serial-1553--25_cheloveka-0008-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 8 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 3126,
+      "url": "https://seasonvar.ru/serial-3126--25_cheloveka-009-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 9 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 4998,
+      "url": "https://seasonvar.ru/serial-4998-25_cheloveka_psvzxqg-00010-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 10 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 7789,
+      "url": "https://seasonvar.ru/serial-7789-25_cheloveka_psmxeaz-11-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 11 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 10729,
+      "url": "https://seasonvar.ru/serial-10729-25_cheloveka_psivucf-012-sezon.html",
+      "label": "Сериал 2,5 человека/Two and a Half Men 12 сезон",
+      "current": true,
+      "note": "(22.02.2015 15 серия из 16)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}

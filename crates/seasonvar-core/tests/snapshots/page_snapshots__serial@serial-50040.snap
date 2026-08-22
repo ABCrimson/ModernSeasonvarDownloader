@@ -1,0 +1,160 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 50040,
+  "slug": "Vsegda_solnechno_v_Filadel_fii-18-season",
+  "url": "https://seasonvar.ru/serial-50040-Vsegda_solnechno_v_Filadel_fii-18-season.html",
+  "title": {
+    "ru": "Всегда солнечно в Филадельфии",
+    "en": "It's Always Sunny in Philadelphia"
+  },
+  "season_number": 18,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/50040.jpg",
+  "description": "Трое приятелей: Деннис, Мак и Чарли решают стать владельцами ирландского паба. В заведении ещ трудится сестрица Денниса, Деандра, а позднее в число совладельцев входит их отец небиологический по имени Фрэнк. Героев и их тараканов надо описать обязательно. Деннис  красавчик-эгоист, в своих глазах  невообразимый мачо. Мак  загадочная персона, себе на уме, и одновременно массовик-затейник. Чарли  человек с давно съехавшей крышей. Диандра  неудачница, желающая стать актрисой. Фрэнк частенько упоминает, что был во Въетнаме, не уточняя, что было это в 90-е, когда он пытался организовать там подпольн",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/50040/plist.txt?time=1787367151",
+      "share_percent": 11.19
+    },
+    {
+      "id": 2,
+      "name": "LostFilm",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/transLostFilm/50040/plist.txt?time=1787367151",
+      "share_percent": 14.07
+    }
+  ],
+  "seasons": [
+    {
+      "id": 1174,
+      "url": "https://seasonvar.ru/serial-1174--Vsegda_solnechno_v_Filadel_fii_psorshg-0001-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 1 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 1401,
+      "url": "https://seasonvar.ru/serial-1401--Vsegda_solnechno_v_Filadel_fii_psgkejl-0002-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 2 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 1527,
+      "url": "https://seasonvar.ru/serial-1527--Vsegda_solnechno_v_Filadel_fii_psvijfw-003-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 3 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 2286,
+      "url": "https://seasonvar.ru/serial-2286--Vsegda_solnechno_v_Filadel_fii_psigqhr-0004-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 4 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 3026,
+      "url": "https://seasonvar.ru/serial-3026--Vsegda_solnechno_v_Filadel_fii_pssfnxe-0005-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 5 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 3950,
+      "url": "https://seasonvar.ru/serial-3950--Vsegda_solnechno_v_Filadel_fii_psgqbkc-006-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 6 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 4394,
+      "url": "https://seasonvar.ru/serial-4394--Vsegda_solnechno_v_Filadel_fii_pscyurx-0007-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 7 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 5440,
+      "url": "https://seasonvar.ru/serial-5440-Vsegda_solnechno_v_Filadel_fii_pslyadz-008-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 8 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 7648,
+      "url": "https://seasonvar.ru/serial-7648-Vsegda_solnechno_v_Filadel_fii_pslrtyz-0009-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 9 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 11141,
+      "url": "https://seasonvar.ru/serial-11141-Vsegda_solnechno_v_Filadel_fii_pscyehs-00010-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 10 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 12966,
+      "url": "https://seasonvar.ru/serial-12966-Vsegda_solnechno_v_Filadel_fii_psyirgw-0011-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 11 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 14881,
+      "url": "https://seasonvar.ru/serial-14881-Vsegda_solnechno_v_Filadel_fii_psxaucp-0012-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 12 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 19275,
+      "url": "https://seasonvar.ru/serial-19275-Vsegda_solnechno_v_Filadel_fii_psjcvdt-13-season.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 13 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 23477,
+      "url": "https://seasonvar.ru/serial-23477-Vsegda_solnechno_v_Filadel_fii_psvycfm-14-sezon.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 14 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 31592,
+      "url": "https://seasonvar.ru/serial-31592-Vsegda_solnechno_v_Filadel_fii_psosdem-15-season.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 15 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 36369,
+      "url": "https://seasonvar.ru/serial-36369-Vsegda_solnechno_v_Filadel_fii_pskcdjb-16-season.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 16 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 44506,
+      "url": "https://seasonvar.ru/serial-44506-Vsegda_solnechno_v_Filadel_fii_pslprgi-17-season.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 17 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 50040,
+      "url": "https://seasonvar.ru/serial-50040-Vsegda_solnechno_v_Filadel_fii-18-season.html",
+      "label": "Сериал Всегда солнечно в Филадельфии/It's Always Sunny in Philadelphia 18 сезон",
+      "current": true,
+      "note": "(21.08.2026 1 серия (LostFilm) из ??)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}

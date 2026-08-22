@@ -1,0 +1,35 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 15615,
+  "slug": "-Boruto_Novoe_Pokolenie_pscevnu-0-sezon",
+  "url": "https://seasonvar.ru/serial-15615--Boruto_Novoe_Pokolenie_pscevnu-0-sezon.html",
+  "title": {
+    "ru": "Боруто: Новое поколение Наруто",
+    "en": "Boruto: Naruto Next Generations"
+  },
+  "season_number": null,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/15615.jpg",
+  "description": "Главное действующее лицо этого проекта - забавный малый по имени Узумаки Боруто. Если вы о нем ничего раньше не слышали, то будьте добры приветствовать сына Хокаге. От своего отца Боруто взял только самое лучшее. Он - по-настоящему умный и очень уверенный парень, который немного хулиганит, но это не так страшно, ведь в жизни всякое может произойти, что потребует от главного героя способности идти против системы. Боруто нередко занимается своими делами, оставляя не у дел учителей, которые ждут того на уроках. Главный герой мечтает быть настоящим ниндзя, но у него не все получается в обучении эт",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/15615/plist.txt?time=1787366582",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 15615,
+      "url": "https://seasonvar.ru/serial-15615--Boruto_Novoe_Pokolenie_pscevnu-0-sezon.html",
+      "label": "Сериал Боруто: Новое поколение Наруто/Boruto: Naruto Next Generations",
+      "current": true,
+      "note": "(27.03.2023 293 серия из 293)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}

@@ -1,0 +1,108 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 22063,
+  "slug": "Igra_prestolov--_psjfuiw-00008---sezon",
+  "url": "https://seasonvar.ru/serial-22063-Igra_prestolov--_psjfuiw-00008---sezon.html",
+  "title": {
+    "ru": "Игра престолов",
+    "en": "Game of Thrones"
+  },
+  "season_number": 8,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/22063.jpg",
+  "description": "Финальный сезон знаменитой эпопеи, рассказывающей о борьбе за власть в семи королевствах. Дейенерис Таргариен обзавелась новыми союзниками и непобедимой флотилией выжившие после печальных для своего клана событий Старки вновь объединяются  Ария стремится воплотить в жизнь план мести. На севере континента свои интересы отстаивает Санса, а с юга подпирает властная Серсея, не собирающаяся сдавать  позиции в борьбе за власть. Джон Сноу продолжает объединение сильных мира сего для борьбы с нависшей угрозой - белыми ходоками. Но кто одержит верх в этом многостороннем противостоянии 8 сезон даст отве",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/22063/plist.txt?time=1787366726",
+      "share_percent": 95.7
+    },
+    {
+      "id": 1,
+      "name": "Субтитры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A1%D1%83%D0%B1%D1%82%D0%B8%D1%82%D1%80%D1%8B/22063/plist.txt?time=1787366726",
+      "share_percent": 2.42
+    },
+    {
+      "id": 33,
+      "name": "ViruseProject",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/transViruseProject/22063/plist.txt?time=1787366726",
+      "share_percent": 0.17
+    },
+    {
+      "id": 18,
+      "name": "Amedia",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/transAmedia/22063/plist.txt?time=1787366726",
+      "share_percent": 1.63
+    },
+    {
+      "id": 68,
+      "name": "Трейлеры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A2%D1%80%D0%B5%D0%B9%D0%BB%D0%B5%D1%80%D1%8B/22063/plist.txt?time=1787366726",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 2219,
+      "url": "https://seasonvar.ru/serial-2219--He_vse_starki_umrut----_psxskbl-00001---sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 1 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 3991,
+      "url": "https://seasonvar.ru/serial-3991-Vse_starki_umrut_psfnisz-00002-sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 2 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 6675,
+      "url": "https://seasonvar.ru/serial-6675-Vse_starki_umrut--_pshytbq-00003--sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 3 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 8676,
+      "url": "https://seasonvar.ru/serial-8676-Igra__prestolov---_pslqjsw-4---sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 4 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 11242,
+      "url": "https://seasonvar.ru/serial-11242-Jon_Snow_umret--_pschiyr-5---sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 5 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 13535,
+      "url": "https://seasonvar.ru/serial-13535-Jon_Snow_voskresnet_psspnjz-000006-sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 6 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 15557,
+      "url": "https://seasonvar.ru/serial-15557--Igra_prestoloB-----_psckgol-7-----sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 7 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 22063,
+      "url": "https://seasonvar.ru/serial-22063-Igra_prestolov--_psjfuiw-00008---sezon.html",
+      "label": "Сериал Игра престолов/Game of Thrones 8 сезон",
+      "current": true,
+      "note": "(10.06.2019 Доп. серия из 6)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}

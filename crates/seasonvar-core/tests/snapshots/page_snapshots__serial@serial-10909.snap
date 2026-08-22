@@ -1,0 +1,41 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 10909,
+  "slug": "1864_pswknpl",
+  "url": "https://seasonvar.ru/serial-10909-1864_pswknpl.html",
+  "title": {
+    "ru": "1864",
+    "en": null
+  },
+  "season_number": null,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/10909.jpg",
+  "description": "Мы окажемся в историческом периоде середины 19 века. Братья Лауст и Питер жили и радовались жизни, строили планы, любили, причм их любовь была одна на двоих ,оба были влюблены в одну девушку. Но все их планы в один миг унесла война. Год 1864 Датское Королевство оказывается втянуто в кровавую бойню, войну с Германией, Пруссией, Австрией. Питер и Лауст теперь солдаты и их долг защищать Родину, забыв о всех мечтах прошлой жизни.Всю жестокость ,весь ужас войны, боль, смерть, разлука - это теперь жизнь героев. Много бойцов датской армии больше никогда не вернутся домой, Дания тоже не станет прежней",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/10909/plist.txt?time=1787366578",
+      "share_percent": 91.41
+    },
+    {
+      "id": 68,
+      "name": "Трейлеры",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans%D0%A2%D1%80%D0%B5%D0%B9%D0%BB%D0%B5%D1%80%D1%8B/10909/plist.txt?time=1787366578",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 10909,
+      "url": "https://seasonvar.ru/serial-10909-1864_pswknpl.html",
+      "label": "Сериал 1864",
+      "current": true,
+      "note": "(24.01.2015 6-8 серия из 8)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}

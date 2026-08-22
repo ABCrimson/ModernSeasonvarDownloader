@@ -1,0 +1,42 @@
+---
+source: crates/seasonvar-core/tests/page_snapshots.rs
+expression: serial
+---
+{
+  "id": 49931,
+  "slug": "Ekstraktory-2-season",
+  "url": "https://seasonvar.ru/serial-49931-Ekstraktory-2-season.html",
+  "title": {
+    "ru": "Экстракторы",
+    "en": "Extraktori"
+  },
+  "season_number": 2,
+  "poster_url": "https://cdn.bigsv.ru/oblojka/49931.jpg",
+  "description": "Фильм погружает зрителя в будни элитного спецподразделения чешской разведки  группы Экстракторы. О существовании этой структуры знают лишь единицы: вся их деятельность проходит в режиме максимальной конфиденциальности. Основная цель отряда  оперативно эвакуировать чешских граждан, попавших в беду вдали от родины. Миссии Экстракторов неизменно связаны с экстремальным риском: агенты регулярно оказываются в эпицентре кризисов, в странах, где к иностранцам относятся с подозрением, а любая ошибка грозит необратимыми последствиями. Картина дат редкий шанс заглянуть в закрытый мир тайных операций и т",
+  "secure_mark": "8c84f820a8d5453aab6be6ad8bed9488",
+  "translations": [
+    {
+      "id": 0,
+      "name": "Стандартный",
+      "playlist_path": "/playls2/8c84f820a8d5453aab6be6ad8bed9488/trans/49931/plist.txt?time=1787366580",
+      "share_percent": null
+    }
+  ],
+  "seasons": [
+    {
+      "id": 43898,
+      "url": "https://seasonvar.ru/serial-43898-Ekstraktory_psapsdo.html",
+      "label": "Сериал Экстракторы/Extraktori 1 сезон",
+      "current": false,
+      "note": null
+    },
+    {
+      "id": 49931,
+      "url": "https://seasonvar.ru/serial-49931-Ekstraktory-2-season.html",
+      "label": "Сериал Экстракторы/Extraktori 2 сезон",
+      "current": true,
+      "note": "(21.08.2026 3 серия из ??)"
+    }
+  ],
+  "fetched_at": "[ts]"
+}
