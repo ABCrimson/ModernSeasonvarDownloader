@@ -89,7 +89,7 @@ ModernSeasonvarDownloader/
 
 ### 5.2 Toolchain & versions
 
-Authoritative list: `docs/bom.html` (v2). Headline pins: Rust 1.99.0-beta.1 (dated beta channel) · Node 26.7 · pnpm 12.0.0-rc.8 · TypeScript 7.0.2 · Tauri 2.11.5 / CLI 2.11.4 · React 19.3.0-canary-eafeac09-20260819 · Vite 8.2.2 (rolldown) + @vitejs/plugin-react 6.1.0 (React Compiler 1.0) · Tailwind 4.3.3 · shadcn 4.19 + radix-ui 1.7.0-rc · TanStack Query 5.101 / Router 1.170 / Virtual 3.14 · zustand 5 · zod 4.4 · Vitest 5.0.0-rc.2 Browser Mode (+ vitest-browser-react 2.2 with peer override) · Playwright 1.62 · Biome 2.5.10 + oxlint 1.79 (tsgolint 7.0.2001) · reqwest 0.13.4 (rustls default) · tokio 1.53 · scraper 0.27 · rusqlite 0.40 bundled · tauri-specta 2.0.0-rc.25. Every pre-release pin is exact; every bet has a named fallback (BOM "Risks").
+Authoritative list: `docs/bom.html` (v2). Headline pins: Rust 1.99.0-beta.1 (dated beta channel) · Node 26.7 · pnpm 12.0.0-rc.8 · TypeScript 7.0.2 · Tauri 2.11.5 / CLI 2.11.4 · React 19.3.0-canary-eafeac09-20260819 · Vite 8.2.2 (rolldown) + @vitejs/plugin-react 6.1.0 (React Compiler 1.0) · Tailwind 4.3.3 · shadcn 4.19 + radix-ui 1.7.0-rc · TanStack Query 5.101 / Router 1.170 / Virtual 3.14 · zustand 5 · zod 4.4 · Vitest 5.0.0-rc.2 Browser Mode (+ vitest-browser-react 2.2 with peer override) · Playwright 1.62 · Biome 2.5.10 + oxlint 1.79 (tsgolint 7.0.2001) · reqwest 0.13.4 (rustls default) · tokio 1.53 · scraper 0.27 · **turso 0.8.0-pre.7** (Rust SQLite rewrite; `default-features = false`, `pure-rust-crypto`; fallback 0.7.2 — ADR-0005) · tauri-specta 2.0.0-rc.25. Every pre-release pin is exact; every bet has a named fallback (BOM "Risks").
 
 **Scaffold gate (M0):** commit 1 must pass `pnpm install --frozen-lockfile`, `cargo build --locked`, `cargo nextest run`, `pnpm test`, and `pnpm tauri build` on all three CI OSes before any feature code. A bet that fails the gate drops to its fallback immediately and the BOM is re-issued.
 
@@ -164,7 +164,7 @@ pub struct SearchHit { pub id: u32, pub title: String, pub path: String, pub url
 pub enum CoreError {
   InvalidSource(String), SerialNotFound { id: u32 }, EmptyPlaylist { translation: String },
   Decode(#[from] DecodeError), Http { status: u16, url: Url }, Network(#[from] reqwest::Error),
-  Io(#[from] std::io::Error), Db(#[from] rusqlite::Error), Config(String), Cancelled,
+  Io(#[from] std::io::Error), Db(#[from] turso::Error), Config(String), Protocol(String), Cancelled,
 }
 impl CoreError { pub fn hint(&self) -> Option<&'static str> }  // e.g. Http{403} → "This region may be blocked by the provider — set a proxy in Settings." ; SerialNotFound → "Paste the full URL from the site; the slug must match."
 ```
@@ -212,7 +212,7 @@ impl Manager {
 
 ### 7.3 Persistence
 
-SQLite file `seasonvar.db` in the core data dir (WAL, `synchronous=NORMAL`, busy_timeout 5 s), opened once, accessed through `spawn_blocking`. Migrations via `rusqlite_migration` (`user_version`).
+SQLite-format file `seasonvar.db` in the core data dir, driven by **Turso** (`turso` crate — Rust rewrite of SQLite; ADR-0005): WAL (the only journal mode), `synchronous=FULL` (NORMAL unsupported), `PRAGMA foreign_keys=ON`, busy_timeout 5 s. One `Database`, a small pool of `Connection`s (`Clone + Send + Sync`); writes go through one connection behind a tokio `Mutex` (Turso allows one active write statement per connection); the API is async-only, so no `spawn_blocking`. **Process model:** Turso is single-process by default — the first process to open the file owns it; a second process gets `CoreError::Db` kind `db_locked` with the hint "The desktop app is using the library — close it, or run this command without `--library`"; read-only CLI commands never open the DB; `[storage] experimental_multiprocess = true` / `--experimental-shared-db` opts into Turso's experimental multiprocess WAL (+IOCP on Windows). Migrations via a ~40-line `store::migrate` runner keyed on `PRAGMA user_version` (create-copy-rename; never `ALTER … COLUMN`). Startup: `PRAGMA integrity_check`, then rotate `seasonvar.db.bak` before migrating. All SQL stays SQLite-portable so any SQLite tool (or rusqlite) can open the file offline for recovery.
 
 ```sql
 CREATE TABLE serials (id INTEGER PRIMARY KEY, slug TEXT, url TEXT, title_ru TEXT NOT NULL, title_en TEXT, season_number INTEGER, poster_url TEXT, description TEXT, first_seen_at TEXT NOT NULL, last_seen_at TEXT NOT NULL);
@@ -323,7 +323,7 @@ Behavior: `<source>` accepts URL/path/id. With >1 translation and no `-t` → `d
 
 ## 15. Risks and fallbacks
 
-See `docs/bom.html` "Risks & kill criteria" for per-bet fallbacks. Project-level: site key rotation (markers as data + fixture refresh); endpoint moves behind auth/DRM (kill criterion for the direct-mp4 approach); aggregate RC risk (M0 gate); repo recreation is irreversible (done once, at M0, after the user refreshes the `gh` token scope).
+See `docs/bom.html` "Risks & kill criteria" for per-bet fallbacks. Project-level: site key rotation (markers as data + fixture refresh); endpoint moves behind auth/DRM (kill criterion for the direct-mp4 approach); aggregate RC risk (M0 gate); repo recreation is irreversible (done once, at M0, after the user refreshes the `gh` token scope); **Turso pre-release engine** (ADR-0005) — mitigated by SQLite-portable SQL, startup integrity check + rotated backup, a reconstructible DB, the `0.7.2` fallback pin, and single-process default (kill criterion: data corruption reproduced in CI → drop to 0.7.2, then to rusqlite offline-recovery mode).
 
 ## 16. Repository operations
 
@@ -337,4 +337,5 @@ See `docs/bom.html` "Risks & kill criteria" for per-bet fallbacks. Project-level
 - Light theme → later; default dark-only.
 - Auto-updater, deep links, tray → deferred per scope choice.
 - Windows ARM64 / Linux ARM64 builds → not in the matrix; default x64 (+ macOS universal).
-- Font: Geist vs Inter → design pass; default Geist.
+- Font: Geist vs Inter → design pass; default Inter (M0 ships Inter).
+- Turso: flip `experimental_multiprocess` default when Turso promotes multiprocess WAL; bump `0.8.0-pre.7` → `0.8.0` GA when published (BOM records the pin).

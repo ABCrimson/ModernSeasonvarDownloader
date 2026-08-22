@@ -1,6 +1,6 @@
 # ADR-0003 — SQLite state owned by the core, shared by CLI and GUI
 
-Date: 2026-08-22 · Status: accepted
+Date: 2026-08-22 · Status: accepted — the engine (`rusqlite`) was superseded by ADR-0005 (Turso) on 2026-08-22; the ownership decision (core owns the data; CLI and GUI share one file) stands
 
 ## Decision
 Download state (jobs, segments for resume), the library (what was downloaded), and seen serials/episodes live in one SQLite file (`seasonvar.db`, WAL) managed by `seasonvar-core` via `rusqlite` (bundled) + `rusqlite_migration`, located by `directories::ProjectDirs::from("io.github", "ABCrimson", "SeasonvarDownloader")`. Engine settings live next to it in `config.toml`, also owned by core. The Tauri app reads and writes both through core; `tauri-plugin-store` holds UI-only preferences.

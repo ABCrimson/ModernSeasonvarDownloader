@@ -154,7 +154,7 @@
 <a class="skip" href="#main">Skip to content</a>
 <header class="hero">
   <div class="wrap">
-    <div class="eyebrow">ModernSeasonvarDownloader · design step 1b · BOM v2 · 2026-08-21</div>
+    <div class="eyebrow">ModernSeasonvarDownloader · design step 1b · BOM v3 (Turso store, ADR-0005) · 2026-08-22</div>
     <h1>Bill of Materials</h1>
     <p class="dek">Every version we pin before the first line of code. Each number was read from a registry by a script today and re-checked by an independent verifier. v2 applies your four calls: TypeScript 7, RCs adopted aggressively, Vitest Browser Mode, Biome + oxlint. Rows that changed from v1 carry a violet edge and a <span class="tag v2">v2</span> mark.</p>
     <div class="chips">
@@ -165,7 +165,7 @@
       <span class="chip"><b>TypeScript</b> 7.0.2 native</span>
       <span class="chip"><b>Vitest</b> 5.0.0-rc.2 · browser</span>
       <span class="chip"><b>pnpm</b> 12.0.0-rc.8</span>
-      <span class="chip">136 lookups · 0 refuted</span>
+      <span class="chip">137 lookups · 0 refuted</span>
     </div>
   </div>
 </header>
@@ -197,10 +197,10 @@
   <h2>Context</h2>
   <p class="lede">You chose a core-first Cargo workspace: a pure-Rust <code>seasonvar-core</code> library consumed by a <code>seasonvar</code> CLI and a Tauri 2 desktop app with a React UI. Scope is parity + finishing the two stubs (real download manager, history) + what the site now exposes (translations, seasons, metadata). <b>Pre-release policy (your call, v2):</b> adopt the next major/minor of a chosen package once it reaches RC (Vitest 5, pnpm 12, radix-ui 1.7), plus React's canary channel, plus Rust beta as the toolchain's RC; alpha/dev/nightly builds (TS 7.1-dev, Playwright 1.63-alpha, zod 4.5-canary, Tailwind insiders) stay out. Status tags: <span class="tag chosen">chosen</span> stable pick · <span class="tag bet">bet</span> bleeding-edge with a named fallback · <span class="tag env">env</span> already on your machine · <span class="tag deferred">deferred</span> later scope · <span class="tag rejected">rejected</span> considered, not used.</p>
   <div class="stats">
-    <div class="card"><div class="stat">136<small>versions pinned</small></div></div>
+    <div class="card"><div class="stat">137<small>versions pinned</small></div></div>
     <div class="card"><div class="stat">59 / 59<small>re-verified by refuter</small></div></div>
     <div class="card"><div class="stat">0<small>open decisions</small></div></div>
-    <div class="card"><div class="stat">2<small>milestones shipped (M0, M1)</small></div></div>
+    <div class="card"><div class="stat">0<small>lines of code yet</small></div></div>
   </div>
 </section>
 
@@ -238,9 +238,9 @@
       <tr><td class="pkg">actions/checkout</td><td class="ver">v7 (v7.0.1)</td><td class="why">—</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr class="changed"><td class="pkg">actions/setup-node</td><td class="ver">v7 (v7.0.0)</td><td class="why"><code>node-version-file: .nvmrc</code> (→ 26), <code>cache: pnpm</code>. M0 gate: the pnpm cache is off on Windows — pnpm 12 RC prints its store as a Windows extended-length path that actions/cache rejects in the post step.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
       <tr><td class="pkg">pnpm/action-setup</td><td class="ver">v6 (v6.0.10)</td><td class="why">Reads the RC version from <code>packageManager</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
-      <tr class="changed"><td class="pkg">dtolnay/rust-toolchain</td><td class="ver">@master<span class="sub">toolchain: beta-2026-08-18 (explicit input; matches rust-toolchain.toml)</span></td><td class="why">Installs the dated beta + clippy/rustfmt; adds <code>aarch64/x86_64-apple-darwin</code> targets on macOS. The workflows reference the action at <code>@master</code> and pin the channel with an explicit <code>toolchain:</code> input (the action's documented form for dated toolchains); that input and <code>rust-toolchain.toml</code> carry the same date and must move together.</td><td class="alt">@1.98.0</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
+      <tr class="changed"><td class="pkg">dtolnay/rust-toolchain</td><td class="ver">@beta<span class="sub">toolchain resolved from rust-toolchain.toml</span></td><td class="why">Installs the dated beta + clippy/rustfmt; adds <code>aarch64/x86_64-apple-darwin</code> targets on macOS. (<code>refs/heads/beta</code> confirmed.)</td><td class="alt">@1.98.0</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
       <tr><td class="pkg">Swatinem/rust-cache</td><td class="ver">v2 (v2.9.2)</td><td class="why">Cargo registry + target cache keyed per job/OS.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
-      <tr><td class="pkg">taiki-e/install-action</td><td class="ver">v2</td><td class="why">Installs cargo-nextest 0.9.143 and cargo-deny 0.20.2 as prebuilt binaries in CI (no <code>cargo install</code> wait).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr class="changed"><td class="pkg">taiki-e/install-action</td><td class="ver">v2</td><td class="why">Installs cargo-nextest 0.9.143 and cargo-deny 0.20.2 as prebuilt binaries in CI (no <code>cargo install</code> wait).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
       <tr><td class="pkg">tauri-apps/tauri-action</td><td class="ver">v1 (v1.0.0)</td><td class="why">Builds bundles on the matrix and creates/uploads the GitHub Release on tag. Makes softprops/action-gh-release unnecessary.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr><td class="pkg">actions/upload-artifact</td><td class="ver">v7 (v7.0.1)</td><td class="why">PR builds expose installers as artifacts (no release).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr><td class="pkg">Linux apt deps</td><td class="ver">libwebkit2gtk-4.1-dev · libappindicator3-dev · librsvg2-dev · patchelf · build-essential · libssl-dev</td><td class="why">Tauri 2 Linux prerequisites on the Ubuntu runner.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
@@ -270,8 +270,8 @@
       <tr><td class="pkg">thiserror</td><td class="ver">2.0.20</td><td class="why">Typed error taxonomy (<code>InvalidUrl</code>, <code>SerialNotFound</code>, <code>NoSuchTranslation</code>, <code>DecodeError</code>, <code>Http</code>, <code>Io</code>…).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr><td class="pkg">tracing</td><td class="ver">0.1.44</td><td class="why">Structured logs/spans; subscribers live in the binaries.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr><td class="pkg">backon</td><td class="ver">1.6.0</td><td class="why">Retry with exponential backoff + jitter for page fetches and segment downloads (simpler than reqwest-middleware stacks).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
-      <tr><td class="pkg">rusqlite</td><td class="ver">0.40.2<span class="sub">bundled</span></td><td class="why">Embedded SQLite for history/library + resumable download state; same DB from CLI and GUI. Accessed via <code>spawn_blocking</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
-      <tr><td class="pkg">rusqlite_migration</td><td class="ver">2.6.0</td><td class="why">Versioned schema migrations.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr class="changed"><td class="pkg">turso</td><td class="ver">0.8.0-pre.7<span class="sub">default-features = false · pure-rust-crypto · fallback 0.7.2</span></td><td class="why">Turso Database — the Rust rewrite of SQLite — as the embedded store for queue/segments/library (ADR-0005). Async-native, pure Rust, SQLite/WAL file format (offline recovery with any SQLite tool). Single-process by default (first process owns the file; opt-in experimental shared mode). Migrations = our own <code>PRAGMA user_version</code> runner; startup integrity check + rotated backup.</td><td class="alt">0.7.2 stable · 0.8.0 GA soon</td><td class="st"><span class="tag bet">bet</span> <span class="tag v2">v3</span></td></tr>
+      <tr class="changed"><td class="pkg">rusqlite · rusqlite_migration</td><td class="ver">0.40.2 · 2.6.0</td><td class="why">Original engine choice (ADR-0003); replaced by Turso (ADR-0005) at the owner's request. Remains the <em>offline</em> recovery path via file-format compatibility, not a runtime backend.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span> <span class="tag v2">v3</span></td></tr>
       <tr><td class="pkg">jiff</td><td class="ver">0.2.35</td><td class="why">Timestamps/durations with proper time zones — the modern chrono successor. Fallback: chrono.</td><td class="alt">—</td><td class="st"><span class="tag bet">bet</span></td></tr>
       <tr><td class="pkg">uuid</td><td class="ver">1.24.1<span class="sub">v7</span></td><td class="why">Time-ordered ids for jobs/downloads.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr><td class="pkg">sanitize-filename</td><td class="ver">0.6.0</td><td class="why">Naming module ships its own per-OS sanitizer (pre-flight ruling); dependency dropped.</td><td class="alt">0.7.0-beta</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
@@ -387,7 +387,8 @@
       <tr><td class="pkg">@tanstack/react-table · react-form</td><td class="ver">9.1.2 · 1.33.5</td><td class="why">YAGNI: episode list is a virtualized checklist; settings is a handful of inputs + zod.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
       <tr><td class="pkg">motion</td><td class="ver">13.1.1</td><td class="why">React 19.3 <code>&lt;ViewTransition&gt;</code> + CSS <code>@starting-style</code> first; add if the design pass needs spring physics.</td><td class="alt">—</td><td class="st"><span class="tag deferred">deferred</span></td></tr>
       <tr><td class="pkg">effect</td><td class="ver">3.22.1</td><td class="why">Not needed; the async logic lives in Rust.</td><td class="alt">4.0.0-rc.111</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
-      <tr><td class="pkg">sqlx · sea-orm · tauri-plugin-sql</td><td class="ver">0.9.0 · 2.0.2 · 2.4.0</td><td class="why">DB must be owned by core for CLI parity; rusqlite bundled is simplest and sync.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr><td class="pkg">sqlx · sea-orm · tauri-plugin-sql</td><td class="ver">0.9.0 · 2.0.2 · 2.4.0</td><td class="why">DB must be owned by core for CLI parity; an ORM/async pool buys nothing over Turso's own async API; `sqlx-turso` is a 0.1.0-alpha third-party adapter.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
+      <tr class="changed"><td class="pkg">PostgreSQL 19 (embedded via postgresql_embedded, or a service) · pglite</td><td class="ver">19 beta 3</td><td class="why">A server process, port and data-dir lifecycle inside a desktop downloader; nothing in the spec needs Postgres features; pglite is JS/WASM where the spec forbids I/O. Asked and answered 2026-08-22 (ADR-0005).</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span> <span class="tag v2">v3</span></td></tr>
       <tr><td class="pkg">chrono</td><td class="ver">—</td><td class="why">jiff chosen (fallback if jiff's 0.2 API bites).</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
       <tr><td class="pkg">reqwest-middleware · reqwest-retry</td><td class="ver">0.5.2 · 0.9.1</td><td class="why">backon covers retries for both HTTP and segment logic.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
       <tr><td class="pkg">governor</td><td class="ver">0.10.4</td><td class="why">Site has no rate limit; a tokio Semaphore bounds CDN concurrency.</td><td class="alt">—</td><td class="st"><span class="tag rejected">rejected</span></td></tr>
@@ -418,7 +419,7 @@
       <tr class="changed"><td class="pkg">Lint</td><td class="ver">Biome (format + style) + oxlint (type-aware)</td><td class="alt">Biome only · ESLint</td><td class="why">Your call: tsgo-backed type-aware correctness rules with Biome's formatter; two configs, both Rust-fast.</td></tr>
       <tr><td class="pkg">Package manager</td><td class="ver">pnpm 12 RC</td><td class="alt">bun 1.4</td><td class="why">Parity with Tauri CLI / Playwright / CI on Windows; bun is faster but not more reliable here.</td></tr>
       <tr><td class="pkg">TLS</td><td class="ver">rustls (reqwest default)</td><td class="alt">native-tls / OpenSSL</td><td class="why">Pure Rust, no OpenSSL on Linux runners, platform root store via verifier.</td></tr>
-      <tr><td class="pkg">Persistence</td><td class="ver">rusqlite bundled in core</td><td class="alt">sqlx · sea-orm · tauri-plugin-sql · JSON files</td><td class="why">Core owns data so CLI and GUI share one history; SQLite handles resume state and 10k-row libraries trivially.</td></tr>
+      <tr class="changed"><td class="pkg">Persistence</td><td class="ver">Turso (Rust SQLite rewrite) in core — ADR-0005</td><td class="alt">rusqlite (ADR-0003) · PostgreSQL 19 · sqlx/sea-orm · KV stores</td><td class="why">Owner's edge pick after rejecting Postgres: async-native, pure Rust, SQLite-format file the CLI and GUI share (sequentially by default; experimental shared mode opt-in); rusqlite stays the offline recovery path.</td></tr>
       <tr><td class="pkg">Routing</td><td class="ver">TanStack Router</td><td class="alt">single view + tabs</td><td class="why">Five real screens with typed params (serial id, translation, episode filters) and back/forward inside the app.</td></tr>
       <tr><td class="pkg">UI flow e2e</td><td class="ver">Playwright + mocked IPC</td><td class="alt">tauri-driver</td><td class="why">Runs on all 3 OSes in CI in minutes; the real Tauri boundary is covered by Rust integration tests + the CLI.</td></tr>
       <tr><td class="pkg">Time</td><td class="ver">jiff</td><td class="alt">chrono</td><td class="why">Modern API, correct zones; young but by a maintainer with a track record (regex, ripgrep). Fallback is one-file.</td></tr>
@@ -435,6 +436,7 @@
     <div class="callout violet">
       <h3>Bleeding-edge bets (each has a named fallback)</h3>
       <ul>
+        <li><b>Turso 0.8.0-pre.7</b> (embedded store) misbehaves → <code>0.7.2</code> stable; if corruption reproduces in CI → rusqlite offline-recovery mode (same file format). Single-process by default; experimental shared mode is opt-in.</li>
         <li><b>Rust 1.99 beta</b> regresses a crate build → <code>1.98.0</code> stable (one line in <code>rust-toolchain.toml</code>).</li>
         <li><b>pnpm 12 RC</b> lockfile/CI glitch → 11.22.0.</li>
         <li><b>React 19.3 canary</b> API churn → 19.2.8; we only touch <code>&lt;Activity&gt;</code>/<code>&lt;ViewTransition&gt;</code> in two places, behind tiny wrappers.</li>

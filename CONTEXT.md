@@ -15,6 +15,7 @@ Terms used in code, docs and UI. `_Avoid_` lists near-synonyms not to use in ide
 - **Season link** — a sibling Serial listed on the page (`.pgs-seaslist`). _Avoid_: "related", "other seasons" in identifiers.
 - **Job** — one queued download of one Episode to one target path; has **segments** (byte ranges) for parallel/resumable transfer. _Avoid_: "task" (tokio tasks), "download" as a noun in code (it's the action).
 - **Library** — the record of completed downloads (the original's "links database"). _Avoid_: "history" (history = any past state; library = what you have), "database".
+- **Store** — the core's persistence module backed by Turso (Rust SQLite rewrite; ADR-0005) over the `seasonvar.db` file: queue, segments, library, seen serials/episodes. _Avoid_: "database"/"DB" as a type name (fine in prose and the `Db` error kind), "repo"/"repository" (that is git).
 - **Settings** — engine/network/site configuration in `config.toml` (core). **Prefs** — UI-only state in `tauri-plugin-store`. _Avoid_: mixing the two words.
 - **Export** — rendering episodes to links/scripts (`wget`, `aria2c`, custom, M3U, JSON). _Avoid_: "script" as the general term.
 - **Client** — the configured HTTP client (`seasonvar_core::Client`). _Avoid_: "fetcher", "requester" (the upstream's name).
