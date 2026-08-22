@@ -3232,6 +3232,30 @@ mod tests {
     }
 
     #[test]
+    fn dot_segments_never_escape() {
+        for os in [TargetOs::Unix, TargetOs::Windows] {
+            for dots in [".", ".."] {
+                let mut c = ctx();
+                c.title = dots.into();
+                let p = render_name(&Template::new("{show}/{title}/x.mp4"), &c, os);
+                let s = p.to_string_lossy().replace('\\', "/");
+                assert!(s.ends_with("/_/x.mp4"), "{os:?} {dots:?} → {s}");
+                assert!(!s.contains("/../") && !s.contains("/./"), "{s}");
+            }
+        }
+    }
+
+    #[test]
+    fn cap_keeps_extension() {
+        let mut c = ctx();
+        c.show = "x".repeat(400);
+        let p = render_name(&Template::new("{show}.mp4"), &c, TargetOs::Unix);
+        let s = p.to_string_lossy().into_owned();
+        assert!(s.ends_with(".mp4"), "{s}");
+        assert!(s.len() <= 200, "{}", s.len());
+    }
+
+    #[test]
     fn missing_numbers_render_as_zero_and_empty_segments_become_underscore() {
         let t = Template::new("{translation}/S{season:02}E{episode:02}.mp4");
         let mut c = ctx();
@@ -3369,12 +3393,26 @@ fn sanitize_segment(raw: &str, os: TargetOs) -> String {
             };
         }
     }
+    // A segment that is only dots would change directories; never let a token value escape the base dir.
+    if s == "." || s == ".." {
+        return "_".to_string();
+    }
     if s.len() > MAX_SEGMENT_BYTES {
-        let mut cut = MAX_SEGMENT_BYTES;
+        // Keep a short extension (1–10 bytes, no whitespace) and cut the stem instead.
+        let ext = s
+            .rsplit_once('.')
+            .filter(|(stem, ext)| !stem.is_empty() && (1..=10).contains(&ext.len()) && !ext.contains(char::is_whitespace))
+            .map(|(_, ext)| ext.to_string());
+        let budget = ext.as_ref().map_or(MAX_SEGMENT_BYTES, |e| MAX_SEGMENT_BYTES - e.len() - 1);
+        let mut cut = budget.min(s.len());
         while !s.is_char_boundary(cut) {
             cut -= 1;
         }
         s.truncate(cut);
+        if let Some(e) = ext {
+            s.push('.');
+            s.push_str(&e);
+        }
     }
     if s.is_empty() { "_".to_string() } else { s }
 }
