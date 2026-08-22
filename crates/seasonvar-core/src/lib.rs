@@ -13,6 +13,7 @@
 //! - [`search`] — [`parse_autocomplete`] / [`Client::autocomplete`]: `/autocomplete.php` → search hits.
 //! - [`naming`] — [`Template`] / [`render_name`]: file-name template → sanitized relative path.
 //! - [`export`] — [`Format`] / [`render_export`]: episodes → links, wget/aria2c/custom scripts, M3U, JSON.
+//! - [`settings`] — [`Settings`] / [`Paths`]: `config.toml` (paths, defaults, validation, dotted `set`, [`ClientConfig`] bridge).
 pub mod client;
 pub mod decode;
 pub mod dto;
@@ -23,6 +24,7 @@ pub mod naming;
 pub mod page;
 pub mod playlist;
 pub mod search;
+pub mod settings;
 pub mod source;
 
 /// Test helpers (recorded fixtures, wiremock site). Enabled with `--features test-support`.
@@ -39,6 +41,7 @@ pub use naming::{NameContext, TargetOs, Template, render_name};
 pub use page::{ZERO_MARK, default_playlist_path, parse_serial_page};
 pub use playlist::parse_playlist_json;
 pub use search::parse_autocomplete;
+pub use settings::{Paths, Settings};
 pub use source::{SITE, SerialUrl, Source};
 
 /// Crate version, single-sourced from the workspace `Cargo.toml`.

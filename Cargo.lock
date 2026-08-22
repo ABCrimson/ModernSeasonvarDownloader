@@ -4836,6 +4836,7 @@ dependencies = [
  "regex",
  "reqwest",
  "scraper",
+ "seasonvar-core",
  "serde",
  "serde_json",
  "specta",

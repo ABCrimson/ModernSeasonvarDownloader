@@ -42,6 +42,8 @@ specta = { workspace = true, optional = true }
 wiremock = { workspace = true, optional = true }
 
 [dev-dependencies]
+# Self-dependency so plain `cargo test -p seasonvar-core` compiles the integration tests that import `test_support`.
+seasonvar-core = { path = ".", features = ["test-support"] }
 wiremock.workspace = true
 insta.workspace = true
 proptest.workspace = true
