@@ -14,6 +14,7 @@
 //! - [`naming`] — [`Template`] / [`render_name`]: file-name template → sanitized relative path.
 //! - [`export`] — [`Format`] / [`render_export`]: episodes → links, wget/aria2c/custom scripts, M3U, JSON.
 //! - [`settings`] — [`Settings`] / [`Paths`]: `config.toml` (paths, defaults, validation, dotted `set`, [`ClientConfig`] bridge).
+//! - [`store`] — [`Store`] / [`StoreOptions`]: the Turso `seasonvar.db` (open/lock/integrity/backup, `user_version` migrations, repositories, [`JobRow`] / [`SegmentRow`] / [`LibraryShow`]).
 pub mod client;
 pub mod decode;
 pub mod dto;
@@ -26,6 +27,7 @@ pub mod playlist;
 pub mod search;
 pub mod settings;
 pub mod source;
+pub mod store;
 
 /// Test helpers (recorded fixtures, wiremock site). Enabled with `--features test-support`.
 #[cfg(feature = "test-support")]
@@ -43,6 +45,7 @@ pub use playlist::parse_playlist_json;
 pub use search::parse_autocomplete;
 pub use settings::{Paths, Settings};
 pub use source::{SITE, SerialUrl, Source};
+pub use store::{JobRow, LibraryItem, LibraryShow, SegmentRow, Store, StoreOptions};
 
 /// Crate version, single-sourced from the workspace `Cargo.toml`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
