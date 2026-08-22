@@ -73,7 +73,7 @@ flowchart LR
 ```
 ModernSeasonvarDownloader/
 ├── Cargo.toml                 # [workspace] members = crates/*, apps/desktop/src-tauri; [workspace.package] version/edition/license
-├── rust-toolchain.toml        # channel = "beta-2026-08-17" (1.99.0-beta.1); components rustfmt, clippy
+├── rust-toolchain.toml        # channel = "beta-2026-08-18" (1.99.0-beta.1); components rustfmt, clippy
 ├── deny.toml · .nvmrc (26) · package.json (root, pnpm workspace) · pnpm-workspace.yaml · biome.json · .oxlintrc.json · lefthook.yml · knip.json · .editorconfig · .gitignore
 ├── crates/
 │   ├── seasonvar-core/        # lib (see §6–§8)
