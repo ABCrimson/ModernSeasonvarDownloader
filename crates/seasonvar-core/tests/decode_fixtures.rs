@@ -1,4 +1,4 @@
-mod support;
+use seasonvar_core::test_support as support;
 
 use seasonvar_core::{MarkerSet, decode_token};
 use serde_json::Value;

@@ -1,4 +1,4 @@
-mod support;
+use seasonvar_core::test_support as support;
 
 use seasonvar_core::{CoreError, SerialUrl, parse_serial_page};
 use support::serial_url_of;

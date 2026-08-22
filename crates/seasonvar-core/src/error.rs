@@ -29,7 +29,9 @@ pub enum CoreError {
     #[error(transparent)]
     Io(#[from] std::io::Error),
     #[error("database error: {0}")]
-    Db(String),
+    Db(#[from] turso::Error),
+    #[error("database `{path}` is locked by another process")]
+    DbLocked { path: String },
     #[error("config error: {0}")]
     Config(String),
     #[error("unexpected response from the site: {0}")]
@@ -52,6 +54,7 @@ impl CoreError {
             CoreError::Network(_) => "network",
             CoreError::Io(_) => "io",
             CoreError::Db(_) => "db",
+            CoreError::DbLocked { .. } => "db_locked",
             CoreError::Config(_) => "config",
             CoreError::Protocol(_) => "protocol",
             CoreError::Cancelled => "cancelled",
@@ -91,6 +94,12 @@ impl CoreError {
             CoreError::Network(e) if e.is_connect() => {
                 Some("Could not connect. Check your connection or proxy.")
             }
+            CoreError::Db(_) => Some(
+                "The local library database failed. A backup (seasonvar.db.bak) is kept next to it; see the logs.",
+            ),
+            CoreError::DbLocked { .. } => Some(
+                "The desktop app is using the library — close it, pass --experimental-shared-db to share it, or pass --no-library to download without recording (read-only commands never touch it).",
+            ),
             CoreError::Config(_) => {
                 Some("Fix the setting in Settings (or config.toml) and try again.")
             }
@@ -129,5 +138,22 @@ mod tests {
         assert_eq!(e.kind(), "decode");
         assert!(e.hint().unwrap().contains("marker"));
         assert_eq!(CoreError::Protocol("x".into()).kind(), "protocol");
+    }
+
+    #[test]
+    fn db_locked_has_kind_and_hint() {
+        let e = CoreError::DbLocked {
+            path: "C:/x/seasonvar.db".into(),
+        };
+        assert_eq!(e.kind(), "db_locked");
+        assert!(e.hint().unwrap().contains("desktop app"));
+        assert!(e.to_string().contains("seasonvar.db"));
+    }
+
+    #[test]
+    fn turso_errors_map_to_db_kind() {
+        let e: CoreError = turso::Error::Error("boom".into()).into();
+        assert_eq!(e.kind(), "db");
+        assert!(e.to_string().contains("boom"));
     }
 }

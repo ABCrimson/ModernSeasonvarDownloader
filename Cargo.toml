@@ -30,6 +30,9 @@ tracing = "=0.1.44"
 backon = "=1.6.0"
 jiff = { version = "=0.2.35", features = ["serde"] }
 directories = "=6.0.0"
+turso = { version = "=0.8.0-pre.7", default-features = false, features = ["pure-rust-crypto"] }
+toml = "=1.1.4"
+uuid = { version = "=1.24.1", features = ["v7"] }
 specta = { version = "=2.0.0-rc.25", features = ["derive", "url"] }
 specta-typescript = "=0.0.12"
 tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }

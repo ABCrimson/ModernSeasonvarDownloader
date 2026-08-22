@@ -7,13 +7,20 @@ license.workspace = true
 repository.workspace = true
 rust-version.workspace = true
 
+[package.metadata.docs.rs]
+all-features = true
+
 [features]
 default = []
 specta = ["dep:specta"]
+test-support = ["dep:wiremock"]
 
 [dependencies]
 reqwest.workspace = true
 tokio.workspace = true
+tokio-util.workspace = true
+tokio-stream.workspace = true
+futures.workspace = true
 bytes.workspace = true
 scraper.workspace = true
 regex.workspace = true
@@ -27,7 +34,12 @@ thiserror.workspace = true
 tracing.workspace = true
 backon.workspace = true
 jiff.workspace = true
+turso.workspace = true
+toml.workspace = true
+uuid.workspace = true
+directories.workspace = true
 specta = { workspace = true, optional = true }
+wiremock = { workspace = true, optional = true }
 
 [dev-dependencies]
 wiremock.workspace = true

@@ -1,6 +1,14 @@
-#![allow(dead_code)]
+//! Shared test helpers: the recorded `fixtures/seasonvar` corpus and a wiremock replica of the
+//! site built from it. Compiled only with `--features test-support`; integration tests of this
+//! crate and of `seasonvar-cli` import it as `use seasonvar_core::test_support as support;`.
 use std::path::{Path, PathBuf};
 
+use wiremock::matchers::{method, path};
+use wiremock::{Mock, MockServer, ResponseTemplate};
+
+use crate::{SerialUrl, Source};
+
+/// Absolute path of the recorded `fixtures/seasonvar` directory at the repo root.
 pub fn fixtures_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../../fixtures/seasonvar")
@@ -8,6 +16,7 @@ pub fn fixtures_dir() -> PathBuf {
         .expect("fixtures dir exists")
 }
 
+/// Read one fixture by its path relative to [`fixtures_dir`] (panics with the path on failure).
 pub fn read_fixture(rel: &str) -> String {
     std::fs::read_to_string(fixtures_dir().join(rel))
         .unwrap_or_else(|e| panic!("fixture {rel}: {e}"))
@@ -46,10 +55,6 @@ pub fn serial_fixtures() -> Vec<(String, String)> {
     v.sort();
     v
 }
-
-use seasonvar_core::{SerialUrl, Source};
-use wiremock::matchers::{method, path};
-use wiremock::{Mock, MockServer, ResponseTemplate};
 
 /// The recorded pages carry their own canonical URL (`<link rel="canonical">` or `og:url`);
 /// derive the `SerialUrl` from it the way a user's pasted URL would be parsed.

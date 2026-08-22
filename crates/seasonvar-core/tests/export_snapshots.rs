@@ -1,4 +1,4 @@
-mod support;
+use seasonvar_core::test_support as support;
 
 use seasonvar_core::{ExportItem, Format, MarkerSet, parse_playlist_json, render_export};
 

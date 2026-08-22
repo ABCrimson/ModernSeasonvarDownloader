@@ -1,4 +1,4 @@
-mod support;
+use seasonvar_core::test_support as support;
 
 use seasonvar_core::{
     Client, ClientConfig, CoreError, MarkerSet, Proxy, Serial, Translation, parse_playlist_json,

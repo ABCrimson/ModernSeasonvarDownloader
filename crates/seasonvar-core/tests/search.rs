@@ -1,4 +1,4 @@
-mod support;
+use seasonvar_core::test_support as support;
 
 use seasonvar_core::{Client, ClientConfig, Proxy, parse_autocomplete};
 use url::Url;

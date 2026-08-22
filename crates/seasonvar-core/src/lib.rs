@@ -3,6 +3,7 @@
 //!
 //! Modules and their entry points (the extraction pipeline reads top to bottom):
 //! - [`error`] — [`CoreError`] / [`DecodeError`]; every user-facing variant carries a [`hint`](CoreError::hint).
+//! - [`dto`] — [`CoreErrorDto`]: the `{ kind, message, hint }` envelope that crosses the CLI `--json` / Tauri boundary.
 //! - [`model`] — the plain data types ([`Serial`], [`Translation`], [`Playlist`], [`Episode`], [`SearchHit`], …).
 //! - [`source`] — [`Source::parse`]: user input → canonical serial URL or bare numeric id.
 //! - [`decode`] — [`MarkerSet`] / [`decode_token`]: playlist token → media URL.
@@ -14,6 +15,7 @@
 //! - [`export`] — [`Format`] / [`render_export`]: episodes → links, wget/aria2c/custom scripts, M3U, JSON.
 pub mod client;
 pub mod decode;
+pub mod dto;
 pub mod error;
 pub mod export;
 pub mod model;
@@ -23,8 +25,13 @@ pub mod playlist;
 pub mod search;
 pub mod source;
 
+/// Test helpers (recorded fixtures, wiremock site). Enabled with `--features test-support`.
+#[cfg(feature = "test-support")]
+pub mod test_support;
+
 pub use client::{Client, ClientConfig, DEFAULT_USER_AGENT, Proxy};
 pub use decode::{MarkerSet, decode_token};
+pub use dto::CoreErrorDto;
 pub use error::{CoreError, DecodeError, Result};
 pub use export::{ExportItem, Format, render_export};
 pub use model::*;
