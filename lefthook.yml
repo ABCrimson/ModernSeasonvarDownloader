@@ -7,6 +7,9 @@ pre-commit:
       stage_fixed: true
     oxlint:
       glob: 'apps/desktop/**/*.{ts,tsx}'
+      exclude:
+        - 'apps/desktop/src/bindings.ts'
+        - 'apps/desktop/src/routeTree.gen.ts'
       run: pnpm exec oxlint --type-aware --tsconfig apps/desktop/tsconfig.json {staged_files}
     rustfmt:
       glob: '*.rs'
