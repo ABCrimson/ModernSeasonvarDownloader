@@ -1,10 +1,12 @@
 //! seasonvar-core — scraping, decoding, search, download engine and library for seasonvar.ru.
 //! Design: docs/superpowers/specs/2026-08-22-seasonvar-downloader-rebuild-design.md
+pub mod client;
 pub mod decode;
 pub mod error;
 pub mod model;
 pub mod source;
 
+pub use client::{Client, ClientConfig, DEFAULT_USER_AGENT, Proxy};
 pub use decode::{MarkerSet, decode_token};
 pub use error::{CoreError, DecodeError, Result};
 pub use model::*;
