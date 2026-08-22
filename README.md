@@ -1,5 +1,7 @@
 # Seasonvar Downloader
 
+[![CI](https://github.com/ABCrimson/ModernSeasonvarDownloader/actions/workflows/ci.yml/badge.svg)](https://github.com/ABCrimson/ModernSeasonvarDownloader/actions/workflows/ci.yml)
+
 Modern, cross-platform desktop downloader (and CLI) for seasonvar.ru — a from-scratch rewrite of
 [DoITCreative/SeasonvarDownloader](https://github.com/DoITCreative/SeasonvarDownloader) (Qt/C++, 2019),
 to whose authors the idea and the original protocol work belong.
