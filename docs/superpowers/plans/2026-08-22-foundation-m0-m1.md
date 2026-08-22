@@ -1545,6 +1545,9 @@ pub enum CoreError {
     Db(String),
     #[error("config error: {0}")]
     Config(String),
+    /// The site answered, but not in the shape we know (malformed playlist/autocomplete JSON, missing markers…).
+    #[error("unexpected response from the site: {0}")]
+    Protocol(String),
     #[error("cancelled")]
     Cancelled,
 }
@@ -1564,6 +1567,7 @@ impl CoreError {
             CoreError::Io(_) => "io",
             CoreError::Db(_) => "db",
             CoreError::Config(_) => "config",
+            CoreError::Protocol(_) => "protocol",
             CoreError::Cancelled => "cancelled",
         }
     }
@@ -1582,6 +1586,7 @@ impl CoreError {
             CoreError::Network(e) if e.is_timeout() => Some("The request timed out. Check your connection or proxy."),
             CoreError::Network(e) if e.is_connect() => Some("Could not connect. Check your connection or proxy."),
             CoreError::Config(_) => Some("Fix the setting in Settings (or config.toml) and try again."),
+            CoreError::Protocol(_) => Some("The site may have changed its format. Try again later, or report this if it persists."),
             _ => None,
         }
     }
@@ -2937,7 +2942,10 @@ fn flatten(items: Vec<RawItem>, out: &mut Vec<RawEpisode>) {
     }
 }
 
-static TITLE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?is)^\s*(\d+)\s*серия\s*(?P<q>[^<]*?)\s*(?:<br\s*/?>\s*(?P<t>.*?))?\s*$").unwrap());
+// Titles: `1 серия SD/FullHD<br>RuDub`, but also `215-216 серия …` (double), `1116.5 серия …` (half), `Доп. серия …` (extra).
+// Two-step parse: split around `серия`, then take the leading integer of the prefix (if any) as the episode number.
+static TITLE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?is)^\s*(?P<pre>[^<]*?)серия\s*(?P<q>[^<]*?)\s*(?:<br\s*/?>\s*(?P<t>.*?))?\s*$").unwrap());
+static NUMBER: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"^\s*(\d+)").unwrap());
 static TAGS: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(?is)<br\s*/?>|<[^>]+>").unwrap());
 static SUBTITLE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\[(\w+)\]([^,\s\]]+)").unwrap());
 
@@ -2947,13 +2955,26 @@ fn clean_text(raw: &str) -> String {
     unescaped.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
-/// (number, quality, translator) parsed from `N серия SD/FullHD<br>Translator`.
+/// (number, quality, translator) parsed from `N серия SD/FullHD<br>Translator` and its variants.
 fn parse_title_parts(raw: &str) -> (Option<u32>, Option<String>, Option<String>) {
     let Some(c) = TITLE.captures(raw) else { return (None, None, None) };
-    let number = c[1].parse().ok();
+    let number = c.name("pre").and_then(|p| NUMBER.captures(p.as_str())).and_then(|n| n[1].parse().ok());
     let quality = c.name("q").map(|m| clean_text(m.as_str())).filter(|s| !s.is_empty());
     let translator = c.name("t").map(|m| clean_text(m.as_str())).filter(|s| !s.is_empty());
     (number, quality, translator)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_title_parts;
+
+    #[test]
+    fn title_variants() {
+        assert_eq!(parse_title_parts("215-216 серия SD/FullHD<br>AniDUB"), (Some(215), Some("SD/FullHD".into()), Some("AniDUB".into())));
+        assert_eq!(parse_title_parts("1116.5 серия HD<br>"), (Some(1116), Some("HD".into()), None));
+        assert_eq!(parse_title_parts("Доп. серия SD/HD<br>"), (None, Some("SD/HD".into()), None));
+        assert_eq!(parse_title_parts("1 серия SD/FullHD<br>RuDub"), (Some(1), Some("SD/FullHD".into()), Some("RuDub".into())));
+    }
 }
 
 fn parse_subtitles(raw: &str) -> Vec<Subtitle> {
@@ -2965,7 +2986,7 @@ fn parse_subtitles(raw: &str) -> Vec<Subtitle> {
 
 /// Parse playlist JSON into episodes. Returns `Ok(vec![])` for `[]`; the fetcher turns that into `EmptyPlaylist`.
 pub fn parse_playlist_json(body: &str, markers: &MarkerSet) -> Result<Vec<Episode>> {
-    let items: Vec<RawItem> = serde_json::from_str(body).map_err(|e| CoreError::Config(format!("playlist is not valid JSON: {e}")))?;
+    let items: Vec<RawItem> = serde_json::from_str(body).map_err(|e| CoreError::Protocol(format!("playlist is not valid JSON: {e}")))?;
     let mut raw = Vec::new();
     flatten(items, &mut raw);
     raw.into_iter()
@@ -3108,7 +3129,7 @@ fn value_to_u32(v: &Value) -> Option<u32> {
 }
 
 pub fn parse_autocomplete(body: &str, base: &Url) -> Result<Vec<SearchHit>> {
-    let raw: RawAutocomplete = serde_json::from_str(body).map_err(|e| CoreError::Config(format!("autocomplete is not valid JSON: {e}")))?;
+    let raw: RawAutocomplete = serde_json::from_str(body).map_err(|e| CoreError::Protocol(format!("autocomplete is not valid JSON: {e}")))?;
     let mut hits = Vec::with_capacity(raw.data.len());
     for (i, path) in raw.data.iter().enumerate() {
         let Some(id) = raw.id.get(i).and_then(value_to_u32) else { continue };
