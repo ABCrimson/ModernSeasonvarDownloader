@@ -3,6 +3,7 @@
 pub mod client;
 pub mod decode;
 pub mod error;
+pub mod export;
 pub mod model;
 pub mod naming;
 pub mod page;
@@ -13,6 +14,7 @@ pub mod source;
 pub use client::{Client, ClientConfig, DEFAULT_USER_AGENT, Proxy};
 pub use decode::{MarkerSet, decode_token};
 pub use error::{CoreError, DecodeError, Result};
+pub use export::{ExportItem, Format, render_export};
 pub use model::*;
 pub use naming::{NameContext, TargetOs, Template, render_name};
 pub use page::{ZERO_MARK, default_playlist_path, parse_serial_page};

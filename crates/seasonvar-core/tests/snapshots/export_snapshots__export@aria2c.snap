@@ -1,0 +1,11 @@
+---
+source: crates/seasonvar-core/tests/export_snapshots.rs
+expression: out
+---
+# aria2c input file — run: aria2c -c -x 4 -s 4 -i this_file.txt
+https://data04-cdn.11cdn.org/fi2lm/8c84f820a8d5453aab6be6ad8bed9488/7f_Extraktori.s02e01.HD1080p.WEBRip.Rus.RuDub.tv.v2a1.08.08.26.mp4
+  dir=Extraktory/Season 02
+  out=Extraktory S02E01 [RuDub].mp4
+https://data05-cdn.11cdn.org/fi2lm/8c84f820a8d5453aab6be6ad8bed9488/7f_Extraktori.s02e02.HD1080p.WEBRip.Rus.RuDub.tv.v2a1.14.08.26.mp4
+  dir=Extraktory/Season 02
+  out=Extraktory S02E02 [RuDub].mp4
