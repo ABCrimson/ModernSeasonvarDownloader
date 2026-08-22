@@ -2,11 +2,18 @@
 use std::collections::BTreeSet;
 use std::fmt::Write as _;
 use std::str::FromStr;
+use std::sync::LazyLock;
 
+use regex::{NoExpand, Regex};
 use serde::{Deserialize, Serialize};
 
 use crate::error::CoreError;
 use crate::model::Episode;
+
+/// `"$OUT"`, `${OUT}` or bare `$OUT` in a custom command; bare `$OUT` only when the next character is
+/// not `[A-Za-z0-9_]`, so `$OUTPUT` is left alone.
+static OUT_TOKEN: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r#""\$OUT"|\$\{OUT\}|\$OUT(?-u:\b)"#).expect("valid regex"));
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
@@ -123,10 +130,10 @@ pub fn render_export(items: &[ExportItem], format: &Format) -> String {
                 cmd.trim()
             };
             for i in items {
-                // `$OUT` (bare or already double-quoted) becomes the safely quoted file name.
-                let with_out = cmd
-                    .replace("\"$OUT\"", &sh_quote(&i.file_name))
-                    .replace("$OUT", &sh_quote(&i.file_name));
+                // `$OUT` (bare, `${OUT}` or already double-quoted) becomes the safely quoted file name
+                // in a single pass, so a `$OUT` inside the file name itself is never re-substituted.
+                let name = sh_quote(&i.file_name);
+                let with_out = OUT_TOKEN.replace_all(cmd, NoExpand(name.as_str()));
                 let _ = writeln!(out, "{with_out} {}", sh_quote(i.episode.media_url.as_str()));
             }
         }

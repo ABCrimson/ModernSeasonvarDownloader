@@ -43,13 +43,16 @@ fn meta(doc: &Html, selector: &str) -> Option<String> {
         .filter(|s| !s.is_empty())
 }
 
-fn https(u: &str) -> Option<Url> {
-    let full = if let Some(rest) = u.strip_prefix("//") {
-        format!("https://{rest}")
+/// Absolute URL from a page attribute: `//host/…` → `https://host/…`, `http://`/`https://` unchanged,
+/// root-relative `/…` resolved against `base` (the canonical serial URL).
+fn https(u: &str, base: &Url) -> Option<Url> {
+    if let Some(rest) = u.strip_prefix("//") {
+        Url::parse(&format!("https://{rest}")).ok()
+    } else if u.starts_with('/') {
+        base.join(u).ok()
     } else {
-        u.to_string()
-    };
-    Url::parse(&full).ok()
+        Url::parse(u).ok()
+    }
 }
 
 fn squash(s: &str) -> String {
@@ -123,16 +126,14 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
                 .attr("data-translate-percent")
                 .and_then(|p| p.trim().parse::<f32>().ok());
             let playlist_path = paths.get(&id).cloned().unwrap_or_else(|| {
+                if id == 0 {
+                    return default_playlist_path(&mark, source.id);
+                }
                 let enc = percent_encoding::utf8_percent_encode(
                     &name,
                     percent_encoding::NON_ALPHANUMERIC,
-                )
-                .to_string();
-                format!(
-                    "/playls2/{mark}/trans{}/{}/plist.txt",
-                    if id == 0 { String::new() } else { enc },
-                    source.id
-                )
+                );
+                format!("/playls2/{mark}/trans{enc}/{}/plist.txt", source.id)
             });
             Some(Translation {
                 id,
@@ -150,10 +151,12 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
         translations.push(Translation::default_for(path));
     }
 
+    // `og:title` is the fallback only when the `h1` is missing or blank.
     let raw_title = doc
         .select(&sel("h1.pgs-sinfo-title"))
         .next()
         .map(|h| h.text().collect::<String>())
+        .filter(|t| !t.trim().is_empty())
         .or_else(|| meta(&doc, r#"meta[property="og:title"]"#))
         .unwrap_or_default();
     let (title, season_number) = parse_title(&raw_title);
@@ -196,10 +199,12 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
             });
         }
     }
-    // Exactly one current season: when both `li.act` and the id match flagged rows, the id match wins.
+    // Exactly one current season: when both `li.act` and the id match flagged rows, the id match wins;
+    // when several rows share `source.id`, only the first of them stays current.
     if seasons.iter().filter(|s| s.current).count() > 1 {
-        for s in seasons.iter_mut() {
-            s.current = s.id == source.id;
+        let first_match = seasons.iter().position(|s| s.id == source.id);
+        for (i, s) in seasons.iter_mut().enumerate() {
+            s.current = Some(i) == first_match;
         }
     }
     if !seasons.iter().any(|s| s.current) {
@@ -215,13 +220,14 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
         );
     }
 
+    let poster_url = meta(&doc, r#"meta[property="og:image"]"#).and_then(|u| https(&u, &canonical));
     Ok(Serial {
         id: source.id,
         slug: Some(source.slug.clone()),
         url: Some(canonical),
         title,
         season_number,
-        poster_url: meta(&doc, r#"meta[property="og:image"]"#).and_then(|u| https(&u)),
+        poster_url,
         description: meta(&doc, r#"meta[name="description"]"#),
         secure_mark,
         translations,

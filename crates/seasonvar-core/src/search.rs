@@ -31,11 +31,16 @@ fn value_to_u32(v: &Value) -> Option<u32> {
     }
 }
 
+/// Parse an `/autocomplete.php` JSON body into search hits; each `data` path is resolved against `base`.
+/// Entries with an empty path, a non-numeric `id`, or a path that does not join onto `base` are skipped.
 pub fn parse_autocomplete(body: &str, base: &Url) -> Result<Vec<SearchHit>> {
     let raw: RawAutocomplete = serde_json::from_str(body)
         .map_err(|e| CoreError::Protocol(format!("autocomplete is not valid JSON: {e}")))?;
     let mut hits = Vec::with_capacity(raw.data.len());
     for (i, path) in raw.data.iter().enumerate() {
+        if path.trim().is_empty() {
+            continue;
+        }
         let Some(id) = raw.id.get(i).and_then(value_to_u32) else {
             continue;
         };
@@ -65,6 +70,8 @@ pub fn parse_autocomplete(body: &str, base: &Url) -> Result<Vec<SearchHit>> {
 }
 
 impl Client {
+    /// `GET /autocomplete.php?query=<query>` (trimmed) → search hits, parsed by [`parse_autocomplete`]
+    /// against the client's base URL.
     pub async fn autocomplete(&self, query: &str) -> Result<Vec<SearchHit>> {
         let mut url = self.url("/autocomplete.php");
         url.query_pairs_mut().append_pair("query", query.trim());

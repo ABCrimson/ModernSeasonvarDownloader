@@ -6,6 +6,11 @@ use regex::{Captures, Regex};
 use serde::{Deserialize, Serialize};
 
 /// A file-name template with `{token}` / `{token:0N}` placeholders and `/` path separators.
+///
+/// Tokens: `show`, `show_ru`, `show_en`, `season`, `episode`, `title`, `translation`, `quality`,
+/// `id`, `ext`. Width grammar: `:0N` with a single digit `N` zero-pads the numeric tokens
+/// (`season`, `episode`, `id`) to `N` characters (`{episode:02}` → `07`); text tokens ignore it.
+/// Unknown tokens are kept literally.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "specta", derive(specta::Type))]
 pub struct Template(String);
@@ -98,7 +103,7 @@ pub fn render_name(template: &Template, ctx: &NameContext, os: TargetOs) -> Path
             "title" => ctx.title.clone(),
             "translation" => ctx.translation.clone(),
             "quality" => ctx.quality.clone().unwrap_or_default(),
-            "id" => ctx.id.to_string(),
+            "id" => num(Some(ctx.id), width),
             "ext" => ctx.ext.clone(),
             _ => return c[0].to_string(),
         };
@@ -112,23 +117,19 @@ pub fn render_name(template: &Template, ctx: &NameContext, os: TargetOs) -> Path
     path
 }
 
+/// `/` and `\` (path separators everywhere), the Windows-illegal punctuation and control characters.
+fn is_illegal(ch: char) -> bool {
+    matches!(ch, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|') || ch.is_control()
+}
+
 /// Token values never create path segments or illegal characters: `/`, `\`, Windows-illegal and control chars are dropped.
 fn clean_value(raw: &str) -> String {
-    raw.chars()
-        .filter(|ch| {
-            !matches!(ch, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|') && !ch.is_control()
-        })
-        .collect()
+    raw.chars().filter(|ch| !is_illegal(*ch)).collect()
 }
 
 fn sanitize_segment(raw: &str, os: TargetOs) -> String {
     // Characters illegal on Windows (and '/' everywhere) are dropped; control chars too.
-    let mut s: String = raw
-        .chars()
-        .filter(|ch| {
-            !matches!(ch, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|') && !ch.is_control()
-        })
-        .collect();
+    let mut s: String = raw.chars().filter(|ch| !is_illegal(*ch)).collect();
     s = WS.replace_all(s.trim(), " ").into_owned();
     if os == TargetOs::Windows {
         s = s.trim_end_matches(['.', ' ']).to_string();
@@ -166,9 +167,9 @@ fn sanitize_segment(raw: &str, os: TargetOs) -> String {
     if s.is_empty() { "_".to_string() } else { s }
 }
 
-/// Truncate `s` to at most `max` bytes without splitting a UTF-8 character.
+/// Truncate `s` to at most `max` bytes without splitting a UTF-8 character (no-op when `s` is shorter).
 fn truncate_at_char_boundary(s: &mut String, max: usize) {
-    let mut cut = max;
+    let mut cut = max.min(s.len());
     while !s.is_char_boundary(cut) {
         cut -= 1;
     }

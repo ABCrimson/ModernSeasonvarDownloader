@@ -15,6 +15,7 @@ use crate::model::{Episode, Playlist, Serial, Subtitle, Translation};
 enum RawItem {
     Folder {
         #[allow(dead_code)]
+        #[serde(default)]
         title: String,
         folder: Vec<RawItem>,
     },
@@ -93,8 +94,9 @@ fn parse_subtitles(raw: &str) -> Vec<Subtitle> {
 
 /// Parse playlist JSON into episodes. Returns `Ok(vec![])` for `[]`; the fetcher turns that into `EmptyPlaylist`.
 pub fn parse_playlist_json(body: &str, markers: &MarkerSet) -> Result<Vec<Episode>> {
-    let items: Vec<RawItem> = serde_json::from_str(body)
-        .map_err(|e| CoreError::Protocol(format!("playlist is not valid JSON: {e}")))?;
+    let items: Vec<RawItem> = serde_json::from_str(body).map_err(|e| {
+        CoreError::Protocol(format!("playlist JSON is not the expected shape: {e}"))
+    })?;
     let mut raw = Vec::new();
     flatten(items, &mut raw);
     raw.into_iter()
@@ -148,7 +150,15 @@ impl Client {
 
 #[cfg(test)]
 mod tests {
-    use super::parse_title_parts;
+    use super::{parse_playlist_json, parse_title_parts};
+    use crate::decode::MarkerSet;
+    use crate::error::CoreError;
+
+    #[test]
+    fn non_json_body_is_a_protocol_error() {
+        let err = parse_playlist_json("<html>", &MarkerSet::default()).unwrap_err();
+        assert!(matches!(err, CoreError::Protocol(_)), "{err:?}");
+    }
 
     #[test]
     fn range_title_takes_first_number_and_keeps_parts() {

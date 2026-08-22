@@ -32,7 +32,7 @@ pub enum Source {
 }
 
 static SERIAL_PATH: LazyLock<Regex> = LazyLock::new(|| {
-    Regex::new(r"(?i)/serial-(\d+)-([^/?#]+?)(?:\.html)?(?:[?#].*)?$").expect("valid regex")
+    Regex::new(r"(?i)/serial-([0-9]+)-([^/?#]+?)(?:\.html)?(?:[?#].*)?$").expect("valid regex")
 });
 
 impl Source {
@@ -59,12 +59,12 @@ impl Source {
         }
         let Some(start) = s.find("/serial-") else {
             return Err(CoreError::InvalidSource(format!(
-                "not a seasonvar serial URL or id: {input}"
+                "not a seasonvar serial URL or id: {s}"
             )));
         };
-        let caps = SERIAL_PATH.captures(&s[start..]).ok_or_else(|| {
-            CoreError::InvalidSource(format!("not a seasonvar serial URL: {input}"))
-        })?;
+        let caps = SERIAL_PATH
+            .captures(&s[start..])
+            .ok_or_else(|| CoreError::InvalidSource(format!("not a seasonvar serial URL: {s}")))?;
         let id: u32 = caps[1]
             .parse()
             .map_err(|_| CoreError::InvalidSource("serial id out of range".into()))?;
@@ -88,12 +88,23 @@ impl Source {
 }
 
 /// Host of a loosely-written URL (`https://h/..`, `//h/..`, `www.h/..`, `h/..`); None for bare paths.
+/// The scheme is matched case-insensitively (`HTTPS://h/..`); a `scheme:` that is not followed by
+/// `//` (`mailto:`, `C:`, …) carries no host and is treated as a bare path.
 fn host_of(s: &str) -> Option<String> {
-    let rest = s
-        .strip_prefix("https://")
-        .or_else(|| s.strip_prefix("http://"))
-        .or_else(|| s.strip_prefix("//"))
-        .unwrap_or(s);
+    let rest = match s.strip_prefix("//") {
+        Some(rest) => rest,
+        None => {
+            let head = s.split('/').next().unwrap_or(s);
+            if head.contains(':') {
+                match (head.strip_suffix(':'), s[head.len()..].strip_prefix("//")) {
+                    (Some(_scheme), Some(rest)) => rest,
+                    _ => return None,
+                }
+            } else {
+                s
+            }
+        }
+    };
     let end = rest.find('/')?;
     let host = &rest[..end];
     if host.is_empty() || !host.contains('.') {
@@ -182,5 +193,13 @@ mod tests {
                 "{bad:?} should be invalid"
             );
         }
+    }
+
+    #[test]
+    fn rejects_uppercase_scheme_foreign_host() {
+        assert!(matches!(
+            Source::parse("HTTPS://evil.com/serial-1-x.html"),
+            Err(CoreError::InvalidSource(_))
+        ));
     }
 }
