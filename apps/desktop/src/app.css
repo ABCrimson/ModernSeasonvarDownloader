@@ -39,7 +39,9 @@ body {
   *,
   *::before,
   *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: reduced-motion kill switch */
     animation: none !important;
+    /* biome-ignore lint/complexity/noImportantStyles: reduced-motion kill switch */
     transition: none !important;
   }
 }

@@ -7,7 +7,9 @@
     "typescript/no-misused-promises": "error",
     "typescript/await-thenable": "error",
     "typescript/no-unnecessary-type-assertion": "warn",
-    "unicorn/filename-case": "off"
+    "unicorn/filename-case": "off",
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": ["warn", { "allow": ["**/*.css"] }]
   },
   "ignorePatterns": [
     "**/dist/**",
