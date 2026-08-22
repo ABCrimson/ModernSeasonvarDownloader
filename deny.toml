@@ -4,6 +4,11 @@ all-features = true
 [advisories]
 version = 2
 yanked = "deny"
+# Only flag unmaintained crates we depend on directly. Tauri 2 on Linux pulls in the
+# unmaintained gtk-rs GTK3 bindings (RUSTSEC-2024-0411..0420), paste, proc-macro-error and
+# unic-* (via urlpattern) transitively — "No safe upgrade is available" for any of them.
+# Vulnerability advisories still apply to the whole graph.
+unmaintained = "workspace"
 
 [licenses]
 version = 2

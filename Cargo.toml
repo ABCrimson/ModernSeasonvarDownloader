@@ -10,7 +10,7 @@ repository = "https://github.com/ABCrimson/ModernSeasonvarDownloader"
 rust-version = "1.98"
 
 [workspace.dependencies]
-seasonvar-core = { path = "crates/seasonvar-core" }
+seasonvar-core = { path = "crates/seasonvar-core", version = "0.1.0" }
 reqwest = { version = "=0.13.4", features = ["json", "stream", "socks", "gzip", "brotli", "zstd"] }
 tokio = { version = "=1.53.1", features = ["rt-multi-thread", "macros", "fs", "io-util", "sync", "time", "signal"] }
 tokio-util = "=0.7.19"
