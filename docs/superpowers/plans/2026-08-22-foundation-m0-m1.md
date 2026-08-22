@@ -2050,8 +2050,15 @@ pub fn decode_token(token: &str, markers: &MarkerSet) -> std::result::Result<Url
         return Err(DecodeError::UnsupportedScheme(token.chars().take(2).collect()));
     };
     let mut cleaned = body.to_string();
-    for marker in markers.markers() {
-        cleaned = cleaned.replace(marker.as_str(), "");
+    // Remove known markers to a fixpoint: a marker inserted inside another marker re-forms after a single pass.
+    loop {
+        let before = cleaned.len();
+        for marker in markers.markers() {
+            cleaned = cleaned.replace(marker.as_str(), "");
+        }
+        if cleaned.len() == before {
+            break;
+        }
     }
     let bytes = match b64(&cleaned) {
         Ok(b) => b,
