@@ -2,9 +2,11 @@
 //! Design: docs/superpowers/specs/2026-08-22-seasonvar-downloader-rebuild-design.md
 pub mod error;
 pub mod model;
+pub mod source;
 
 pub use error::{CoreError, DecodeError, Result};
 pub use model::*;
+pub use source::{SITE, SerialUrl, Source};
 
 /// Crate version, single-sourced from the workspace `Cargo.toml`.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
