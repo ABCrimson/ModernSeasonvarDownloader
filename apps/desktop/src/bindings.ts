@@ -18,7 +18,7 @@ export const events = {
 };
 
 /* Types */
-/**  Emitted once the Rust side is ready. */
+/**  Emitted when the main webview has finished loading the page. */
 export type AppReady = {
 	version: string,
 };
