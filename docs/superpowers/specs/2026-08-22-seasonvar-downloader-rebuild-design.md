@@ -287,7 +287,7 @@ Behavior: `<source>` accepts URL/path/id. With >1 translation and no `-t` → `d
 - **Library:** grouped by show (poster, title, count, size), items with state/exists-on-disk, actions open/reveal/re-download/remove record; search filter.
 - **Settings:** download folder (picker), title language, naming template with live preview (`render_name_preview`), engine limits (jobs/segments/speed), network (proxy select + URL + **Test**), advanced (markers list, base URL), about (version, links, logs folder). Saved through `set_settings` with zod validation client-side and `Settings::validate` server-side.
 - **Design:** Crimson identity (`crimson-design` skill is the source of truth): dark glass OKLCH palette, gold primary / violet secondary, red/green only for failed/completed semantics, layered shadows, micro-interactions with `linear()` easings, `@starting-style` entries, `prefers-reduced-motion` respected, `:focus-visible` gold rings, tabular numerals on every number. Dark-only for v1 (the operator's preference); tokens are structured so a light theme can be added.
-- **Keyboard map:** `⌘K` search · `⌘V` paste URL · `⌘D` download selected · `Space` toggle row · `Shift+click` range · `⌘A` select all · `Esc` clear · `⌘,` settings · `⌘1..4` routes.
+- **Keyboard map** (⌘ on macOS = Ctrl on Windows/Linux): `⌘K` search · `⌘V` paste URL · `⌘D` download selected · `Space` toggle row · `Shift+click` range · `⌘A` select all · `Esc` clear · `⌘,` settings · `⌘1..4` routes.
 - **Errors:** every failed command shows a sonner toast with `message` + `hint`; route-level `react-error-boundary` with retry.
 
 ## 12. Testing strategy (whole repo)
