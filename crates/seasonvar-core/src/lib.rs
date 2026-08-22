@@ -6,6 +6,7 @@ pub mod error;
 pub mod model;
 pub mod page;
 pub mod playlist;
+pub mod search;
 pub mod source;
 
 pub use client::{Client, ClientConfig, DEFAULT_USER_AGENT, Proxy};
@@ -14,6 +15,7 @@ pub use error::{CoreError, DecodeError, Result};
 pub use model::*;
 pub use page::{ZERO_MARK, default_playlist_path, parse_serial_page};
 pub use playlist::parse_playlist_json;
+pub use search::parse_autocomplete;
 pub use source::{SITE, SerialUrl, Source};
 
 /// Crate version, single-sourced from the workspace `Cargo.toml`.
