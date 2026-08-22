@@ -140,9 +140,12 @@ fn paths_in_dir_places_files_under_root() {
     assert!(p.db_file.ends_with("seasonvar.db"));
     assert!(p.logs_dir.ends_with("logs"));
     let d = Paths::discover().unwrap();
+    // `directories` keeps the case on Windows/macOS (`SeasonvarDownloader`) but lowercases the
+    // application name on XDG platforms (`~/.config/seasonvardownloader`).
     assert!(
         d.config_file
             .to_string_lossy()
-            .contains("SeasonvarDownloader")
+            .to_lowercase()
+            .contains("seasonvardownloader")
     );
 }

@@ -172,7 +172,9 @@ mod tests {
 
     proptest! {
         #[test]
-        fn roundtrips_with_markers_at_any_offset(host in "[a-z0-9-]{3,12}", path in "[A-Za-z0-9_.]{1,40}", off1 in 0usize..200, off2 in 0usize..200) {
+        // Hosts must stay valid for the `url` crate: no IDNA/punycode prefix (`xn--…` with junk
+        // after it is rejected by the parser) and no leading/trailing hyphen.
+        fn roundtrips_with_markers_at_any_offset(host in "[a-z0-9][a-z0-9-]{1,10}[a-z0-9]".prop_filter("no punycode prefix", |h| !h.starts_with("xn--")), path in "[A-Za-z0-9_.]{1,40}", off1 in 0usize..200, off2 in 0usize..200) {
             let plain = format!("//{host}.11cdn.org/fi2lm/{path}.mp4");
             let body = STANDARD.encode(&plain);
             let m = MarkerSet::default();
