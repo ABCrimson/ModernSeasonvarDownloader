@@ -124,12 +124,11 @@ thiserror = "=2.0.20"
 tracing = "=0.1.44"
 backon = "=1.6.0"
 jiff = { version = "=0.2.35", features = ["serde"] }
-sanitize-filename = "=0.6.0"
 directories = "=6.0.0"
 specta = { version = "=2.0.0-rc.25", features = ["derive", "url"] }
 specta-typescript = "=0.0.12"
 tauri-specta = { version = "=2.0.0-rc.25", features = ["derive", "typescript"] }
-tauri = "=2.11.5"
+tauri = { version = "=2.11.5", features = ["specta"] }
 tauri-build = "=2.6.3"
 tauri-plugin-dialog = "=2.7.2"
 tauri-plugin-opener = "=2.5.4"
@@ -185,7 +184,6 @@ thiserror.workspace = true
 tracing.workspace = true
 backon.workspace = true
 jiff.workspace = true
-sanitize-filename.workspace = true
 specta = { workspace = true, optional = true }
 
 [dev-dependencies]
@@ -2278,7 +2276,6 @@ pub const DEFAULT_USER_AGENT: &str =
 
 /// Proxy selection. Serialized as a string: `none` | `system` | `http://host:port` | `socks5://host:port`.
 #[derive(Debug, Clone, PartialEq, Eq, Default, Serialize, Deserialize)]
-#[cfg_attr(feature = "specta", derive(specta::Type))]
 #[serde(try_from = "String", into = "String")]
 pub enum Proxy {
     None,
@@ -2640,7 +2637,7 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
         let url = canonical.join(href).unwrap_or_else(|_| canonical.clone());
         let label = squash(&a.text().collect::<String>());
         let note = li.select(&sel("span")).next().map(|s| squash(&s.text().collect::<String>())).filter(|s| !s.is_empty());
-        let current = li.value().has_class("act", scraper::CaseSensitivity::AsciiCaseInsensitive) || id == source.id;
+        let current = li.value().classes().any(|c| c == "act") || id == source.id;
         seasons.push(SeasonLink { id, url, label, current, note });
     }
     if !seasons.iter().any(|s| s.current) {
@@ -3143,12 +3140,15 @@ mod tests {
 
     #[test]
     fn windows_reserved_names_and_trailing_dots() {
-        let t = Template::new("{show}/{title}.mp4");
         let mut c = ctx();
         c.show = "CON".into();
-        c.title = "ends with dot.".into();
-        let p = render_name(&t, &c, TargetOs::Windows);
-        assert_eq!(p.to_string_lossy().replace('\\', "/"), "CON_/ends with dot.mp4");
+        c.title = "trailing   spaces   ".into();
+        let p = render_name(&Template::new("{show}/{title}"), &c, TargetOs::Windows);
+        assert_eq!(p.to_string_lossy().replace('\\', "/"), "CON_/trailing spaces");
+        let dots = render_name(&Template::new("{title}..."), &c, TargetOs::Windows);
+        assert_eq!(dots.to_string_lossy(), "trailing spaces");
+        let unix = render_name(&Template::new("{show}"), &c, TargetOs::Unix);
+        assert_eq!(unix.to_string_lossy(), "CON", "reserved names only matter on Windows");
     }
 
     #[test]
@@ -3253,7 +3253,7 @@ fn num(n: Option<u32>, width: Option<usize>) -> String {
 pub fn render_name(template: &Template, ctx: &NameContext, os: TargetOs) -> PathBuf {
     let rendered = TOKEN.replace_all(template.as_str(), |c: &Captures| {
         let width = c.get(2).and_then(|w| w.as_str().parse::<usize>().ok());
-        match &c[1] {
+        let value = match &c[1] {
             "show" => ctx.show.clone(),
             "show_ru" => ctx.show_ru.clone(),
             "show_en" => ctx.show_en.clone().unwrap_or_else(|| ctx.show_ru.clone()),
@@ -3264,14 +3264,23 @@ pub fn render_name(template: &Template, ctx: &NameContext, os: TargetOs) -> Path
             "quality" => ctx.quality.clone().unwrap_or_default(),
             "id" => ctx.id.to_string(),
             "ext" => ctx.ext.clone(),
-            _ => c[0].to_string(),
-        }
+            _ => return c[0].to_string(),
+        };
+        clean_value(&value)
     });
+    // Only the template's own `/` separators create path segments.
     let mut path = PathBuf::new();
     for segment in rendered.split('/') {
         path.push(sanitize_segment(segment, os));
     }
     path
+}
+
+/// Token values never create path segments or illegal characters: `/`, `\`, Windows-illegal and control chars are dropped.
+fn clean_value(raw: &str) -> String {
+    raw.chars()
+        .filter(|ch| !matches!(ch, '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|') && !ch.is_control())
+        .collect()
 }
 
 fn sanitize_segment(raw: &str, os: TargetOs) -> String {
@@ -3588,7 +3597,8 @@ async fn full_pipeline_over_recorded_site() {
     for t in &serial.translations {
         match c.fetch_playlist(&serial, t).await {
             Ok(pl) => { assert!(!pl.episodes.is_empty()); total += pl.episodes.len(); }
-            Err(CoreError::EmptyPlaylist { .. }) => {}
+            // `[]` recorded, or no fixture recorded for this translation (mount_site mounts only files that exist).
+            Err(CoreError::EmptyPlaylist { .. }) | Err(CoreError::Http { status: 404, .. }) => {}
             Err(e) => panic!("{}: {e}", t.name),
         }
     }
