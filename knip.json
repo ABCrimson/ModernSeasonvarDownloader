@@ -3,31 +3,13 @@
   "workspaces": {
     ".": {
       "entry": [],
-      "project": [],
-      "ignoreDependencies": ["oxlint-tsgolint", "lefthook"]
+      "project": []
     },
     "apps/desktop": {
-      "entry": [
-        "src/main.tsx",
-        "src/routes/**/*.tsx",
-        "e2e/**/*.ts",
-        "vite.config.ts",
-        "vitest.config.ts",
-        "playwright.config.ts",
-        "src/test/setup.ts",
-        "src/components/ui/**/*.tsx"
-      ],
-      "project": ["src/**/*.{ts,tsx}"],
-      "ignore": ["src/bindings.ts", "src/routeTree.gen.ts", "src/components/ui/**"],
+      "entry": ["src/routes/**/*.tsx", "e2e/**/*.ts", "src/components/ui/**/*.tsx"],
+      "project": ["src/**/*.{ts,tsx,css}"],
+      "ignore": ["src/bindings.ts"],
       "ignoreDependencies": [
-        "oxc-transform-react",
-        "@vitest/browser",
-        "@vitest/coverage-v8",
-        "@vitest/ui",
-        "playwright",
-        "tw-animate-css",
-        "@fontsource-variable/inter",
-        "@tauri-apps/cli",
         "@tanstack/react-virtual",
         "@tauri-apps/plugin-clipboard-manager",
         "@tauri-apps/plugin-dialog",
@@ -42,9 +24,7 @@
         "zod",
         "zustand",
         "@tanstack/react-query-devtools",
-        "@tanstack/react-router-devtools",
-        "shadcn",
-        "tailwindcss"
+        "@tanstack/react-router-devtools"
       ]
     }
   }
