@@ -46,6 +46,6 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: Seasonvar Downloader ${{ github.ref_name }}
           releaseBody: See CHANGELOG.md for details.
-          releaseDraft: false
+          releaseDraft: true
           prerelease: ${{ contains(github.ref_name, '-') }}
           args: ${{ matrix.args }}

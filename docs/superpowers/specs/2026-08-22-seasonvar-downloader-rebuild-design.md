@@ -134,7 +134,7 @@ pub struct SearchHit { pub id: u32, pub title: String, pub path: String, pub url
 
 ### 6.2 Client
 
-`Client::new(ClientConfig { base_url: Url (default https://seasonvar.ru), proxy: Proxy::{None,System,Http(Url),Socks5(Url)}, timeout: 15s, user_agent: browser-like, markers: MarkerSet })`. Wraps `reqwest::Client` (rustls default, gzip/brotli/zstd, HTTP/2). All fetches use `backon` exponential backoff (3 attempts, 250 ms base, jitter) on network errors and 5xx; never on 4xx. `base_url` injection is how tests point the client at `wiremock`.
+`Client::new(ClientConfig { base_url: Url (default https://seasonvar.ru), proxy: Proxy::{None,System,Http(Url),Socks5(Url)}, timeout: 15s, user_agent: browser-like, markers: MarkerSet })`. Wraps `reqwest::Client` (rustls default, gzip/brotli/zstd, HTTP/2). All fetches use `backon` exponential backoff (3 retries after the first attempt, 250 ms base, 5 s cap, jitter) on network errors and 5xx; never on 4xx. `base_url` injection is how tests point the client at `wiremock`.
 
 ### 6.3 Pipeline
 
