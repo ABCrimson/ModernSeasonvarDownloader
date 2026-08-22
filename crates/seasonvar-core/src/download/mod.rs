@@ -184,7 +184,7 @@ pub enum Event {
     Added {
         job: Job,
     },
-    /// At most 4 Hz per Job.
+    /// Ticks at ≤ 4 Hz per Job, plus one final event when the segments are done.
     Progress {
         #[cfg_attr(feature = "specta", specta(type = String))]
         id: Uuid,
@@ -446,12 +446,7 @@ impl Manager {
                 e.cancel.cancel();
             }
             s if !s.is_terminal() => {
-                worker::remove_part(&e.job.target_path).await;
-                if let Some(store) = &self.shared.store
-                    && let Err(err) = store.replace_segments(id, &[]).await
-                {
-                    tracing::warn!(%id, error = %err, "could not clear the segments of a cancelled job");
-                }
+                worker::discard(&self.shared, id, &e.job.target_path).await;
                 set_state(&self.shared, e, JobState::Cancelled, None).await;
                 notify_idle(&self.shared, &jobs);
             }
@@ -476,7 +471,8 @@ impl Manager {
         Ok(())
     }
 
-    /// Forget a terminal Job (and delete its Store row). Non-terminal Jobs must be cancelled first.
+    /// Forget a terminal Job (and delete its Store row; a Failed Job's `.part` is removed too).
+    /// Non-terminal Jobs must be cancelled first.
     pub async fn remove(&self, id: Uuid) -> Result<()> {
         let mut jobs = self.shared.jobs.lock().await;
         let Some(e) = jobs.get(&id) else {
@@ -486,6 +482,10 @@ impl Manager {
             return Err(CoreError::Config(
                 "cancel the job before removing it".into(),
             ));
+        }
+        if e.job.state == JobState::Failed {
+            // a Failed Job may still own a `.part`; it goes with the Job
+            worker::discard(&self.shared, id, &e.job.target_path).await;
         }
         jobs.remove(&id);
         if let Some(store) = &self.shared.store {

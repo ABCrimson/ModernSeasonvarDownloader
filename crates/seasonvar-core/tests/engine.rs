@@ -3,8 +3,8 @@ use std::time::{Duration, Instant};
 
 use seasonvar_core::test_support::mount_cdn;
 use seasonvar_core::{
-    Client, ClientConfig, EnqueueItem, Episode, Event, JobState, Limits, Manager, Serial, Store,
-    StoreOptions, Title, Translation,
+    Client, ClientConfig, EnqueueItem, Episode, Event, JobState, Limits, Manager, Proxy, Serial,
+    Store, StoreOptions, Title, Translation,
 };
 use url::Url;
 use uuid::Uuid;
@@ -54,6 +54,7 @@ fn limits() -> Limits {
 }
 fn client() -> Client {
     Client::new(ClientConfig {
+        proxy: Proxy::None,
         timeout: Duration::from_secs(5),
         retries: 1,
         ..ClientConfig::default()
