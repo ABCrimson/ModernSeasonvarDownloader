@@ -259,6 +259,7 @@ impl Settings {
     }
 
     /// `config set <section.key> <value>` — typed parsing per field, then [`validate`](Settings::validate).
+    /// Transactional: on any `Err` (unknown key, unparsable value, failed validation) `self` is left untouched.
     pub fn set_value(&mut self, key: &str, value: &str) -> Result<()> {
         let invalid = |what: &str| CoreError::Config(format!("invalid value for {key}: {what}"));
         let parse_u8 = |v: &str| {
@@ -271,32 +272,41 @@ impl Settings {
             "false" | "0" | "no" | "off" => Ok(false),
             _ => Err(invalid("expected true/false")),
         };
+        let parse_proxy = |v: &str| {
+            v.parse::<Proxy>().map_err(|e| match e {
+                CoreError::Config(m) => invalid(&m),
+                other => other,
+            })
+        };
+        let mut next = self.clone();
         match key {
-            "general.download_dir" => self.general.download_dir = value.to_string(),
-            "general.title_language" => self.general.title_language = value.to_string(),
-            "general.naming_template" => self.general.naming_template = value.to_string(),
-            "general.auto_resume" => self.general.auto_resume = parse_bool(value)?,
-            "general.overwrite" => self.general.overwrite = parse_bool(value)?,
-            "engine.concurrent_jobs" => self.engine.concurrent_jobs = parse_u8(value)?,
-            "engine.segments_per_job" => self.engine.segments_per_job = parse_u8(value)?,
-            "engine.retries" => self.engine.retries = parse_u8(value)?,
-            "engine.speed_limit_kbps" => self.engine.speed_limit_kbps = parse_u64(value)?,
-            "network.proxy" => self.network.proxy = value.parse()?,
-            "network.timeout_secs" => self.network.timeout_secs = parse_u64(value)?,
-            "network.user_agent" => self.network.user_agent = value.to_string(),
-            "site.base_url" => self.site.base_url = value.to_string(),
+            "general.download_dir" => next.general.download_dir = value.to_string(),
+            "general.title_language" => next.general.title_language = value.to_string(),
+            "general.naming_template" => next.general.naming_template = value.to_string(),
+            "general.auto_resume" => next.general.auto_resume = parse_bool(value)?,
+            "general.overwrite" => next.general.overwrite = parse_bool(value)?,
+            "engine.concurrent_jobs" => next.engine.concurrent_jobs = parse_u8(value)?,
+            "engine.segments_per_job" => next.engine.segments_per_job = parse_u8(value)?,
+            "engine.retries" => next.engine.retries = parse_u8(value)?,
+            "engine.speed_limit_kbps" => next.engine.speed_limit_kbps = parse_u64(value)?,
+            "network.proxy" => next.network.proxy = parse_proxy(value)?,
+            "network.timeout_secs" => next.network.timeout_secs = parse_u64(value)?,
+            "network.user_agent" => next.network.user_agent = value.to_string(),
+            "site.base_url" => next.site.base_url = value.to_string(),
             "site.markers" => {
-                self.site.markers = value
+                next.site.markers = value
                     .split(',')
                     .map(|s| s.trim().to_string())
                     .filter(|s| !s.is_empty())
                     .collect()
             }
             "storage.experimental_multiprocess" => {
-                self.storage.experimental_multiprocess = parse_bool(value)?
+                next.storage.experimental_multiprocess = parse_bool(value)?
             }
             other => return Err(CoreError::Config(format!("unknown setting `{other}`"))),
         }
-        self.validate()
+        next.validate()?;
+        *self = next;
+        Ok(())
     }
 }
