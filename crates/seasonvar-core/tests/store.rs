@@ -172,7 +172,7 @@ async fn jobs_and_segments_roundtrip() {
     store.delete_job(job.id).await.unwrap();
     assert!(
         store.segments(job.id).await.unwrap().is_empty(),
-        "segments cascade"
+        "segments removed with the job"
     );
     assert!(store.get_job(job.id).await.unwrap().is_none());
 }
@@ -233,14 +233,127 @@ async fn write_serializes_and_reader_sees_committed_rows() {
 
 #[tokio::test]
 async fn second_process_is_rejected_with_db_locked() {
-    // Cross-process lock: run the CLI binary? Not available in core. Emulate with a second Database handle in THIS process
-    // only if Turso's lock is per-handle (Windows); document the observed behaviour instead of asserting it here.
+    // Observed with Turso 0.8.0-pre.7: the single-process lock is per PROCESS on every OS (Windows keeps a
+    // refcounted in-process registry; Unix uses fcntl), so a second open in the same process succeeds.
+    // The cross-process rejection (`DbLocked`) is asserted by the CLI test in Task 7, where a child process exists.
     let dir = tempfile::tempdir().unwrap();
     let db = dir.path().join("seasonvar.db");
     let _store = Store::open(&db, StoreOptions::default()).await.unwrap();
     match Store::open(&db, StoreOptions::default()).await {
-        Err(CoreError::DbLocked { .. }) => {} // per-handle lock (Windows LockFileEx)
-        Ok(_) => {} // per-process lock (Unix fcntl): same process may open twice
+        Err(CoreError::DbLocked { .. }) => {} // would mean a per-handle lock (not observed)
+        Ok(_) => {} // per-process lock: same process may open twice (observed on Windows)
         Err(e) => panic!("unexpected error: {e}"),
     }
+}
+
+#[tokio::test]
+async fn foreign_keys_cascade_segments_on_raw_delete() {
+    let dir = tempfile::tempdir().unwrap();
+    let store = Store::open(&dir.path().join("seasonvar.db"), StoreOptions::default())
+        .await
+        .unwrap();
+    let s = sample_serial();
+    store.upsert_serial(&s).await.unwrap();
+    let job = sample_job(s.id);
+    store.insert_job(&job).await.unwrap();
+    store
+        .replace_segments(
+            job.id,
+            &[SegmentRow {
+                idx: 0,
+                start: 0,
+                end: 99,
+                done: 0,
+            }],
+        )
+        .await
+        .unwrap();
+    assert_eq!(store.segments(job.id).await.unwrap().len(), 1);
+    let id = job.id.to_string();
+    store
+        .write(|conn| async move {
+            conn.execute("DELETE FROM downloads WHERE id=?", [id])
+                .await?;
+            Ok(())
+        })
+        .await
+        .unwrap();
+    assert!(
+        store.segments(job.id).await.unwrap().is_empty(),
+        "ON DELETE CASCADE fired: foreign_keys=ON on the writer"
+    );
+}
+
+#[tokio::test]
+async fn write_rolls_back_a_transaction_left_open() {
+    let dir = tempfile::tempdir().unwrap();
+    let store = Store::open(&dir.path().join("seasonvar.db"), StoreOptions::default())
+        .await
+        .unwrap();
+    // A closure that begins a transaction and never finishes it (what a dropped future leaves behind).
+    store
+        .write(|conn| async move {
+            conn.execute_batch("BEGIN IMMEDIATE").await?;
+            conn.execute(
+                "INSERT INTO serials (id, title_ru, first_seen_at, last_seen_at) VALUES (1, 'x', 't', 't')",
+                (),
+            )
+            .await?;
+            Ok(())
+        })
+        .await
+        .unwrap();
+    // The next write finds the writer back in autocommit and the uncommitted row gone.
+    let (autocommit, n): (bool, i64) = store
+        .write(|conn| async move {
+            let autocommit = conn.is_autocommit()?;
+            let mut rows = conn.query("SELECT COUNT(*) FROM serials", ()).await?;
+            let n = rows.next().await?.expect("one row").get::<i64>(0)?;
+            Ok((autocommit, n))
+        })
+        .await
+        .unwrap();
+    assert!(autocommit, "writer was rolled back into autocommit");
+    assert_eq!(n, 0, "the abandoned transaction's insert was discarded");
+    store.upsert_serial(&sample_serial()).await.unwrap();
+    assert_eq!(store.recent_serials(10).await.unwrap().len(), 1);
+}
+
+#[tokio::test]
+async fn open_keeps_previous_backup_when_integrity_check_fails() {
+    let dir = tempfile::tempdir().unwrap();
+    let db = dir.path().join("seasonvar.db");
+    let bak = db.with_extension("db.bak");
+    let store = Store::open(&db, StoreOptions::default()).await.unwrap();
+    store.upsert_serial(&sample_serial()).await.unwrap();
+    store.close().await;
+    // The previous session's last-good backup.
+    std::fs::write(&bak, b"previous-good-backup").unwrap();
+    // Corrupt every page after page 1 (the header/schema page stays valid, so the file still opens).
+    let mut bytes = std::fs::read(&db).unwrap();
+    assert!(bytes.len() > 4096 * 2, "database spans several pages");
+    for b in &mut bytes[4096..] {
+        *b = 0xA5;
+    }
+    std::fs::write(&db, &bytes).unwrap();
+    let store = Store::open(&db, StoreOptions::default()).await.unwrap();
+    assert_eq!(store.user_version().await.unwrap(), 1);
+    assert_eq!(
+        std::fs::read(&bak).unwrap(),
+        b"previous-good-backup",
+        "a failing integrity check must not overwrite the last-good backup"
+    );
+    // And a healthy database does rotate over it.
+    let healthy = dir.path().join("healthy.db");
+    let healthy_bak = healthy.with_extension("db.bak");
+    Store::open(&healthy, StoreOptions::default())
+        .await
+        .unwrap()
+        .close()
+        .await;
+    std::fs::write(&healthy_bak, b"old").unwrap();
+    Store::open(&healthy, StoreOptions::default())
+        .await
+        .unwrap();
+    assert_ne!(std::fs::read(&healthy_bak).unwrap(), b"old");
 }

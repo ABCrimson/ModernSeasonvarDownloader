@@ -37,6 +37,14 @@ pub struct Store {
     inner: Arc<Inner>,
 }
 
+impl std::fmt::Debug for Store {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Store")
+            .field("path", &self.inner.path)
+            .finish()
+    }
+}
+
 struct Inner {
     path: PathBuf,
     db: Database,
@@ -84,12 +92,15 @@ impl Store {
         conn.pragma_update("journal_mode", "WAL").await?;
         conn.pragma_update("synchronous", "FULL").await?;
         conn.pragma_update("foreign_keys", "ON").await?;
-        Self::integrity_check(&conn).await;
+        let healthy = Self::integrity_check(&conn).await;
         if opts.backup && !opts.read_only && existed {
-            Self::checkpoint(&conn).await; // best effort
-            let bak = db_file.with_extension("db.bak");
-            if let Err(e) = std::fs::copy(db_file, &bak) {
-                tracing::warn!(error = %e, "could not rotate database backup");
+            if healthy {
+                Self::checkpoint(&conn).await; // best effort
+                Self::rotate_backup(db_file, path_str);
+            } else {
+                tracing::warn!(
+                    "database failed its integrity check; not rotating the backup so the previous one survives"
+                );
             }
         }
         if !opts.read_only {
@@ -104,27 +115,93 @@ impl Store {
         })
     }
 
-    /// `PRAGMA wal_checkpoint(TRUNCATE)` answers with a `(busy, log, checkpointed)` row, so it must be
-    /// queried (and drained), not executed. Errors are ignored: the file stays valid without it.
+    /// `PRAGMA wal_checkpoint(TRUNCATE)` answers with a `(busy, log, checkpointed)` row, so it is
+    /// queried (and drained), not executed. Best effort: problems are logged, never returned.
     async fn checkpoint(conn: &Connection) {
-        if let Ok(mut rows) = conn.query("PRAGMA wal_checkpoint(TRUNCATE)", ()).await {
-            while let Ok(Some(_)) = rows.next().await {}
+        let mut rows = match conn.query("PRAGMA wal_checkpoint(TRUNCATE)", ()).await {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::warn!(error = %e, "WAL checkpoint failed");
+                return;
+            }
+        };
+        loop {
+            match rows.next().await {
+                Ok(Some(row)) => {
+                    let busy = row.get::<i64>(0).unwrap_or(0);
+                    if busy != 0 {
+                        let log = row.get::<i64>(1).unwrap_or(-1);
+                        let checkpointed = row.get::<i64>(2).unwrap_or(-1);
+                        tracing::warn!(
+                            log,
+                            checkpointed,
+                            "WAL checkpoint incomplete: database busy"
+                        );
+                    }
+                }
+                Ok(None) => break,
+                Err(e) => {
+                    tracing::warn!(error = %e, "WAL checkpoint failed");
+                    break;
+                }
+            }
         }
     }
 
-    async fn integrity_check(conn: &Connection) {
-        match conn.query("PRAGMA integrity_check", ()).await {
-            Ok(mut rows) => match rows.next().await {
-                Ok(Some(row)) => {
-                    let status: String = row.get::<String>(0).unwrap_or_default();
-                    if status != "ok" {
-                        tracing::error!(%status, "database integrity check failed — a backup is kept next to the file");
-                    }
+    /// Copy `<db>` to `<db>.bak`. If the WAL still holds frames after the checkpoint, copy it alongside
+    /// as `<db>.bak-wal` (otherwise drop a stale one) so the pair is restorable. Best effort.
+    fn rotate_backup(db_file: &Path, path_str: &str) {
+        let bak = db_file.with_extension("db.bak");
+        if let Err(e) = std::fs::copy(db_file, &bak) {
+            tracing::warn!(error = %e, "could not rotate database backup");
+            return;
+        }
+        let wal = PathBuf::from(format!("{path_str}-wal"));
+        let mut bak_wal = bak.into_os_string();
+        bak_wal.push("-wal");
+        let bak_wal = PathBuf::from(bak_wal);
+        let wal_len = std::fs::metadata(&wal).map(|m| m.len()).unwrap_or(0);
+        if wal_len > 0 {
+            tracing::info!(
+                bytes = wal_len,
+                "WAL still holds frames; copying it next to the backup"
+            );
+            if let Err(e) = std::fs::copy(&wal, &bak_wal) {
+                tracing::warn!(error = %e, "could not copy the WAL next to the backup");
+            }
+        } else if bak_wal.exists()
+            && let Err(e) = std::fs::remove_file(&bak_wal)
+        {
+            tracing::warn!(error = %e, "could not remove a stale backup WAL");
+        }
+    }
+
+    /// `PRAGMA integrity_check`: `true` when the database reports `ok` or the pragma is unavailable;
+    /// `false` when it reports a problem or cannot be read to completion (the file is suspect, so the
+    /// caller must not overwrite the previous backup with it).
+    async fn integrity_check(conn: &Connection) -> bool {
+        let mut rows = match conn.query("PRAGMA integrity_check", ()).await {
+            Ok(rows) => rows,
+            Err(e) => {
+                tracing::debug!(error = %e, "integrity_check pragma unavailable; skipping");
+                return true;
+            }
+        };
+        match rows.next().await {
+            Ok(Some(row)) => {
+                let status: String = row.get::<String>(0).unwrap_or_default();
+                if status == "ok" {
+                    true
+                } else {
+                    tracing::error!(%status, "database integrity check failed; the previous backup is left untouched");
+                    false
                 }
-                Ok(None) => {}
-                Err(e) => tracing::warn!(error = %e, "integrity check could not be read"),
-            },
-            Err(e) => tracing::debug!(error = %e, "integrity_check pragma unavailable; skipping"),
+            }
+            Ok(None) => true,
+            Err(e) => {
+                tracing::error!(error = %e, "database integrity check could not be read; the previous backup is left untouched");
+                false
+            }
         }
     }
 
@@ -144,13 +221,25 @@ impl Store {
             .expect("connect on an open database")
     }
 
-    /// Run `f` with the single writer connection (serialized across the process).
+    /// Run `f` with the single writer connection (serialized across the process). A transaction left
+    /// open by a previous closure (its future dropped between `BEGIN` and `COMMIT`) is rolled back first.
     pub async fn write<F, Fut, T>(&self, f: F) -> Result<T>
     where
         F: FnOnce(Connection) -> Fut,
         Fut: std::future::Future<Output = Result<T>>,
     {
         let guard = self.inner.writer.lock().await;
+        if matches!(guard.is_autocommit(), Ok(false)) {
+            match guard.execute_batch("ROLLBACK").await {
+                Ok(()) => {
+                    tracing::warn!("rolled back a transaction left open by a cancelled write");
+                }
+                Err(e) => tracing::warn!(
+                    error = %e,
+                    "could not roll back a transaction left open by a cancelled write"
+                ),
+            }
+        }
         let conn = guard.clone();
         let out = f(conn).await;
         drop(guard);
