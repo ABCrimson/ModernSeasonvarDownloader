@@ -66,7 +66,7 @@ pub fn decode_token(token: &str, markers: &MarkerSet) -> std::result::Result<Url
     let bytes = match b64(&cleaned) {
         Ok(b) => b,
         Err(_) => {
-            let generic = GENERIC_MARKER.replace_all(body, "");
+            let generic = GENERIC_MARKER.replace_all(&cleaned, "");
             b64(&generic).map_err(|_| DecodeError::Base64 {
                 token: token.to_string(),
             })?
@@ -142,6 +142,28 @@ mod tests {
         let unknown = format!("//{}", STANDARD.encode("zzzz")); // "//enp6eg=="
         let token = format!("#2{}{}{}", &body[..10], unknown, &body[10..]);
         let url = decode_token(&token, &MarkerSet::new(Vec::<String>::new())).unwrap();
+        assert_eq!(
+            url.as_str(),
+            "https://data01-cdn.11cdn.org/fi2lm/x/7f_A.s01e01.mp4"
+        );
+    }
+
+    #[test]
+    fn nested_markers_are_removed_to_a_fixpoint() {
+        let plain = "//data01-cdn.11cdn.org/fi2lm/x/7f_A.s01e01.mp4";
+        let body = STANDARD.encode(plain);
+        let m0 = "//b2xvbG8=";
+        let m1 = "//Z3JpZA==";
+        // marker 1 spliced inside marker 0: a single pass would re-form marker 0 but not remove it.
+        let token = format!(
+            "#2{}{}{}{}{}",
+            &body[..10],
+            &m0[..4],
+            m1,
+            &m0[4..],
+            &body[10..]
+        );
+        let url = decode_token(&token, &MarkerSet::default()).unwrap();
         assert_eq!(
             url.as_str(),
             "https://data01-cdn.11cdn.org/fi2lm/x/7f_A.s01e01.mp4"
