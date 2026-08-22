@@ -2509,8 +2509,8 @@ fn every_serial_fixture_parses_and_matches_snapshot() {
         assert!(serial.translations.iter().any(|t| t.id == 0), "{name}: no default translation");
         assert!(serial.secure_mark.as_deref().is_some_and(|m| m.len() == 32), "{name}: secure_mark");
         assert!(serial.seasons.iter().filter(|s| s.current).count() == 1, "{name}: exactly one current season");
-        insta::with_settings!({ snapshot_suffix => name.trim_end_matches(".html"), redactions => { ".fetched_at" => "[ts]" } }, {
-            insta::assert_json_snapshot!("serial", serial);
+        insta::with_settings!({ snapshot_suffix => name.trim_end_matches(".html") }, {
+            insta::assert_json_snapshot!("serial", serial, { ".fetched_at" => "[ts]" });
         });
     }
 }
@@ -2661,26 +2661,39 @@ pub fn parse_serial_page(html: &str, source: &SerialUrl) -> Result<Serial> {
         .unwrap_or_default();
     let (title, season_number) = parse_title(&raw_title);
 
+    // Recorded markup: ONE `li.act` holds every season as `<h2><a href="/serial-…">label <span>note</span></a></h2>`;
+    // the current season's anchor text is prefixed with " >>> ". Iterate anchors, not list items.
     let canonical = source.canonical();
     let mut seasons: Vec<SeasonLink> = Vec::new();
     for li in doc.select(&sel(".pgs-seaslist ul.tabs-result li")) {
-        let Some(a) = li.select(&sel("h2 a")).next() else { continue };
-        let Some(href) = a.value().attr("href") else { continue };
-        let Some(id) = SERIAL_ID.captures(href).and_then(|c| c[1].parse::<u32>().ok()) else { continue };
-        let url = canonical.join(href).unwrap_or_else(|_| canonical.clone());
-        let label = squash(&a.text().collect::<String>());
-        let note = li.select(&sel("span")).next().map(|s| squash(&s.text().collect::<String>())).filter(|s| !s.is_empty());
-        let current = li.value().classes().any(|c| c == "act") || id == source.id;
-        seasons.push(SeasonLink { id, url, label, current, note });
+        let li_active = li.value().classes().any(|c| c == "act");
+        for a in li.select(&sel("h2 a")) {
+            let Some(href) = a.value().attr("href") else { continue };
+            let Some(id) = SERIAL_ID.captures(href).and_then(|c| c[1].parse::<u32>().ok()) else { continue };
+            let url = canonical.join(href).unwrap_or_else(|_| canonical.clone());
+            let note = a.select(&sel("span")).next().map(|s| squash(&s.text().collect::<String>())).filter(|s| !s.is_empty());
+            let own_text: String = a.text().collect::<String>();
+            let label = squash(own_text.trim_start_matches(|c: char| c == ' ' || c == '>'))
+                .trim_end_matches(note.as_deref().unwrap_or(""))
+                .trim()
+                .to_string();
+            let current = li_active || id == source.id;
+            seasons.push(SeasonLink { id, url, label, current, note });
+        }
     }
-    if !seasons.iter().any(|s| s.current) {
-        seasons.insert(0, SeasonLink { id: source.id, url: canonical.clone(), label: title.ru.clone(), current: true, note: None });
-    }
-    // Exactly one current season: when both `li.act` and the id match flagged rows, the id match wins.
-    if seasons.iter().filter(|s| s.current).count() > 1 {
+    // Exactly one current season: the id match wins; `li.act` alone only counts when no id matched.
+    if seasons.iter().any(|s| s.id == source.id) {
         for s in seasons.iter_mut() {
             s.current = s.id == source.id;
         }
+    } else if seasons.iter().filter(|s| s.current).count() > 1 {
+        let first = seasons.iter().position(|s| s.current).unwrap_or(0);
+        for (i, s) in seasons.iter_mut().enumerate() {
+            s.current = i == first;
+        }
+    }
+    if !seasons.iter().any(|s| s.current) {
+        seasons.insert(0, SeasonLink { id: source.id, url: canonical.clone(), label: title.ru.clone(), current: true, note: None });
     }
 
     Ok(Serial {
