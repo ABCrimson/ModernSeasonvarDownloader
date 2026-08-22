@@ -6,7 +6,7 @@ Modern, cross-platform desktop downloader (and CLI) for seasonvar.ru — a from-
 [DoITCreative/SeasonvarDownloader](https://github.com/DoITCreative/SeasonvarDownloader) (Qt/C++, 2019),
 to whose authors the idea and the original protocol work belong.
 
-Status: **M0 complete — M1 (core extraction) in progress.** See `docs/superpowers/specs/` for the design, `docs/bom.html`
+Status: **M0 + M1 complete** — core extraction pipeline with recorded fixtures; CLI commands (M2) and the download engine (M3) are next. See `docs/superpowers/specs/` for the design, `docs/bom.html`
 for every pinned version, `adr/` for decisions, `CONTEXT.md` for vocabulary.
 
 ## Develop

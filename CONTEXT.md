@@ -6,7 +6,7 @@ Terms used in code, docs and UI. `_Avoid_` lists near-synonyms not to use in ide
 - **Serial** — the site's unit: one show-season page (`/serial-<id>-<slug>.html`), with an integer **serial id**. A different season is a different Serial. _Avoid_: "show", "series", "season entity".
 - **slug** — the URL path piece after `serial-<id>-`, including any `-N-season` suffix; must match the site's exactly.
 - **secureMark** — 32-hex value in `data4play` on the page; echoed into playlist/CDN paths but not validated. _Avoid_: "token" (see below), "secret".
-- **Translation** — one audio/subtitle variant of a Serial (`data-translate` id + name: Стандартный, LostFilm, Субтитры, Трейлеры…). Id 0 is the default. _Avoid_: "voice", "dub", "озвучка", "audio track".
+- **Translation** — one audio/subtitle variant of a Serial (`data-translate` id + name: Стандартный, LostFilm, Субтитры, Трейлеры…). Id 0 is the default. _Avoid_: "voice", "dub", "озвучка", "audio track". `TranslationKind::Dub` is the accepted variant name for voiced translations; the "dub" avoidance applies only to using it as a synonym for Translation itself.
 - **Playlist** — the JSON list behind one Translation (`plist.txt`), flattened over nested folders. _Avoid_: "plist" (only in URL strings), "episode list".
 - **Episode** — one playlist item after flattening; has an **ordinal** (position) and, when parsed, a **number** ("N серия"). _Avoid_: "item", "entry", "file".
 - **token** — the raw obfuscated `file` value (`#2` + base64 with markers). _Avoid_: "hash", "secureMark".

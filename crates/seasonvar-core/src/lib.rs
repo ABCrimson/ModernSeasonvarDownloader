@@ -1,5 +1,17 @@
 //! seasonvar-core — scraping, decoding, search, download engine and library for seasonvar.ru.
 //! Design: docs/superpowers/specs/2026-08-22-seasonvar-downloader-rebuild-design.md
+//!
+//! Modules and their entry points (the extraction pipeline reads top to bottom):
+//! - [`error`] — [`CoreError`] / [`DecodeError`]; every user-facing variant carries a [`hint`](CoreError::hint).
+//! - [`model`] — the plain data types ([`Serial`], [`Translation`], [`Playlist`], [`Episode`], [`SearchHit`], …).
+//! - [`source`] — [`Source::parse`]: user input → canonical serial URL or bare numeric id.
+//! - [`decode`] — [`MarkerSet`] / [`decode_token`]: playlist token → media URL.
+//! - [`client`] — [`Client`] / [`ClientConfig`] / [`Proxy`]: HTTP with retries, proxy and marker set.
+//! - [`page`] — [`parse_serial_page`] / [`Client::fetch_serial`]: serial page → [`Serial`].
+//! - [`playlist`] — [`parse_playlist_json`] / [`Client::fetch_playlist`]: `plist.txt` → episodes.
+//! - [`search`] — [`parse_autocomplete`] / [`Client::autocomplete`]: `/autocomplete.php` → search hits.
+//! - [`naming`] — [`Template`] / [`render_name`]: file-name template → sanitized relative path.
+//! - [`export`] — [`Format`] / [`render_export`]: episodes → links, wget/aria2c/custom scripts, M3U, JSON.
 pub mod client;
 pub mod decode;
 pub mod error;

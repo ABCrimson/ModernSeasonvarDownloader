@@ -1,4 +1,4 @@
-//! Serial page → `Serial`: secureMark, translations (pl[N]), seasons, title, poster, description.
+//! Serial page → `Serial`: secureMark, translations (`pl[N]`), seasons, title, poster, description.
 use std::collections::BTreeMap;
 use std::sync::LazyLock;
 
