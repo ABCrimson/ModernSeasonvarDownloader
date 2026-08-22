@@ -78,7 +78,7 @@ fixtures/capture.sh
 
 - [ ] **Step 1: Install the pinned toolchain**
 
-Run: `rustup toolchain install beta-2026-08-18 --profile minimal --component rustfmt clippy`
+Run: `rustup toolchain install beta-2026-08-18 --profile minimal --component rustfmt,clippy`
 Expected: ends with `beta-2026-08-18-x86_64-pc-windows-msvc installed - rustc 1.99.0-beta.1 (...)`. If rustup says the channel does not exist, run `curl -s https://static.rust-lang.org/dist/channel-rust-beta.toml | grep ^date` and use that date everywhere this plan says `2026-08-18` (also fix `docs/bom.html`, the spec §5.1 and `adr/0002`).
 
 - [ ] **Step 2: Write `rust-toolchain.toml`**
