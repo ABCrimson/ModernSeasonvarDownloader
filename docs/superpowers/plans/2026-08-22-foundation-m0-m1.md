@@ -1168,7 +1168,11 @@ import type { Page } from '@playwright/test'
 
 export type IpcHandlers = Record<string, (args: unknown) => unknown>
 
-/** Installs a minimal `window.__TAURI_INTERNALS__` before the app boots, mirroring @tauri-apps/api/mocks. */
+/**
+ * Installs a minimal `window.__TAURI_INTERNALS__` (+ event-plugin internals) before the app boots, mirroring
+ * @tauri-apps/api/mocks. Handlers are serialized with `toString()` and rebuilt in the page: pass self-contained
+ * arrow functions (no closures over test-scope variables, no method shorthand).
+ */
 export async function installTauriMock(page: Page, handlers: IpcHandlers) {
   await page.addInitScript((serialized: string) => {
     const table = new Function(`return (${serialized})`)() as Record<string, (args: unknown) => unknown>
@@ -1177,8 +1181,11 @@ export async function installTauriMock(page: Page, handlers: IpcHandlers) {
       metadata: { currentWindow: { label: 'main' }, currentWebview: { label: 'main' } },
       transformCallback: (cb: (...a: unknown[]) => void) => {
         const id = Math.floor(Math.random() * 1e9)
-        ;(window as unknown as Record<string, unknown>)[`_${id}`] = cb
+        w[`_${id}`] = cb
         return id
+      },
+      unregisterCallback: (id: number) => {
+        delete w[`_${id}`]
       },
       invoke: async (cmd: string, args: unknown) => {
         if (cmd === 'plugin:event|listen') return 1
@@ -1188,6 +1195,8 @@ export async function installTauriMock(page: Page, handlers: IpcHandlers) {
         return h(args)
       },
     }
+    // @tauri-apps/api/event calls this before invoking plugin:event|unlisten.
+    w.__TAURI_EVENT_PLUGIN_INTERNALS__ = { unregisterListener: () => {} }
   }, `{${Object.entries(handlers).map(([k, f]) => `${JSON.stringify(k)}: ${f.toString()}`).join(',')}}`)
 }
 ```
