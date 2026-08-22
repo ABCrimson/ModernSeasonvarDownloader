@@ -15,11 +15,17 @@ pub struct Ctx {
 }
 
 impl Ctx {
-    pub fn bootstrap(globals: &Globals) -> Result<Ctx, CliError> {
-        let paths = match &globals.data_dir {
+    /// Resolve the paths only (`--data-dir` or the OS dirs) — no `config.toml` parsing, no client.
+    /// `config path` / `config reset` run on this so a broken config file can still be recovered.
+    pub fn paths_only(globals: &Globals) -> Result<Paths, CliError> {
+        Ok(match &globals.data_dir {
             Some(d) => Paths::in_dir(d),
             None => Paths::discover()?,
-        };
+        })
+    }
+
+    pub fn bootstrap(globals: &Globals) -> Result<Ctx, CliError> {
+        let paths = Self::paths_only(globals)?;
         let settings = Settings::load(&paths.config_file)?;
         let mut cfg: ClientConfig = settings.client_config()?;
         if let Some(p) = &globals.proxy {

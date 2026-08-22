@@ -81,6 +81,9 @@ pub fn parse_episode_ranges(spec: &str) -> Result<Vec<RangeInclusive<u32>>, CliE
         let r = match part.split_once('-') {
             None => {
                 let n: u32 = part.parse().map_err(|_| bad())?;
+                if n == 0 {
+                    return Err(bad());
+                }
                 n..=n
             }
             Some((a, b)) => {
@@ -124,4 +127,40 @@ pub fn select_episodes(
             ranges.iter().any(|r| r.contains(&n))
         })
         .collect())
+}
+
+/// [`select_episodes`], but a valid `-e` that matches nothing is a usage error — `links`/`export`
+/// must never silently print or write an empty selection.
+pub fn select_episodes_nonempty(
+    episodes: Vec<Episode>,
+    spec: Option<&str>,
+) -> Result<Vec<Episode>, CliError> {
+    let total = episodes.len();
+    let selected = select_episodes(episodes, spec)?;
+    if let Some(spec) = spec
+        && selected.is_empty()
+    {
+        return Err(CliError::Usage(format!(
+            "no episodes match `{spec}` (translation has {total} episodes)"
+        )));
+    }
+    Ok(selected)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ranges_parse_and_reject_zero_and_reversed() {
+        let r = parse_episode_ranges("1-5, 8 ,12-").unwrap();
+        assert_eq!(r, vec![1..=5, 8..=8, 12..=u32::MAX]);
+        assert_eq!(parse_episode_ranges("-3").unwrap(), vec![1..=3]);
+        for bad in ["0", "0-3", "5-3", "x", "1-x", "", " , "] {
+            assert!(
+                matches!(parse_episode_ranges(bad), Err(CliError::Usage(_))),
+                "{bad:?} must be a usage error"
+            );
+        }
+    }
 }

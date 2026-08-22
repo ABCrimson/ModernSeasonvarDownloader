@@ -78,9 +78,9 @@ pub struct PlaylistArgs {
 pub struct ExportArgs {
     #[command(flatten)]
     pub playlist: PlaylistArgs,
-    /// links | wget | aria2c | custom | m3u | json
-    #[arg(short = 'f', long = "format", default_value = "links")]
-    pub format: String,
+    /// links | wget | aria2c | custom | m3u | json (default: links; json when --json is set)
+    #[arg(short = 'f', long = "format", value_name = "FORMAT")]
+    pub format: Option<String>,
     /// Program for `--format custom`; `$OUT` is replaced by the quoted file name.
     #[arg(long, value_name = "CMD")]
     pub command: Option<String>,

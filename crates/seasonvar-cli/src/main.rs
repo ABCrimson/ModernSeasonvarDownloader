@@ -4,6 +4,8 @@ mod commands;
 mod context;
 mod output;
 
+use std::io::IsTerminal;
+
 use clap::Parser;
 
 fn main() {
@@ -24,6 +26,7 @@ fn main() {
                 .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new(level)),
         )
         .with_writer(std::io::stderr)
+        .with_ansi(std::io::stderr().is_terminal())
         .init();
     let json = cli.globals.json;
     let rt = tokio::runtime::Runtime::new().expect("tokio runtime");

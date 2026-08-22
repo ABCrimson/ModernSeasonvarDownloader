@@ -2,18 +2,23 @@
 use seasonvar_core::Source;
 
 use crate::cli::PlaylistArgs;
-use crate::commands::selection::{pick_translation, select_episodes};
+use crate::commands::selection::{
+    parse_episode_ranges, pick_translation, select_episodes_nonempty,
+};
 use crate::context::Ctx;
 use crate::output::{CliError, print_json};
 
 pub async fn run(ctx: &Ctx, a: &PlaylistArgs) -> Result<(), CliError> {
+    if let Some(spec) = a.episodes.as_deref() {
+        parse_episode_ranges(spec)?; // usage errors before any network call
+    }
     let serial = ctx
         .client
         .fetch_serial(&Source::parse(&a.source.source)?)
         .await?;
     let translation = pick_translation(&serial, a.translation.as_deref(), ctx.globals.json)?;
     let mut playlist = ctx.client.fetch_playlist(&serial, translation).await?;
-    playlist.episodes = select_episodes(playlist.episodes, a.episodes.as_deref())?;
+    playlist.episodes = select_episodes_nonempty(playlist.episodes, a.episodes.as_deref())?;
     if ctx.globals.json {
         return print_json(&playlist);
     }

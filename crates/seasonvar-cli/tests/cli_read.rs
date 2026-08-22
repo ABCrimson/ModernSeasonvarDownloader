@@ -130,6 +130,31 @@ async fn export_wget_to_file_with_selection() {
     assert_eq!(code, 0);
     let v: serde_json::Value = serde_json::from_str(&out).unwrap();
     assert_eq!(v.as_array().unwrap().len(), 1);
+    // `--json` without `-f` means the json format: one JSON array on stdout.
+    let (code, out, _) =
+        run(bin(&server.uri(), dir.path()).args(["export", STAR_TREK, "--json", "-e", "1"]));
+    assert_eq!(code, 0);
+    let v: serde_json::Value = serde_json::from_str(&out).unwrap();
+    assert_eq!(v.as_array().unwrap().len(), 1);
+    assert!(v[0]["file_name"].is_string() && v[0]["media_url"].is_string());
+    // `--json` with `-o`: the file is written, stdout is the {path, items} summary.
+    let json_file = dir.path().join("dl.json");
+    let (code, out, _) = run(bin(&server.uri(), dir.path())
+        .args(["export", STAR_TREK, "--json", "-e", "1-2", "-o"])
+        .arg(&json_file));
+    assert_eq!(code, 0);
+    let v: serde_json::Value = serde_json::from_str(&out).unwrap();
+    assert_eq!(v["items"], 2);
+    assert_eq!(Path::new(v["path"].as_str().unwrap()), json_file);
+    let written: serde_json::Value =
+        serde_json::from_str(&std::fs::read_to_string(&json_file).unwrap()).unwrap();
+    assert_eq!(written.as_array().unwrap().len(), 2);
+    // `--json` on stdout conflicts with a non-json `-f`.
+    let (code, out, _) = run(bin(&server.uri(), dir.path())
+        .args(["export", STAR_TREK, "--json", "-f", "wget", "-e", "1"]));
+    assert_eq!(code, 2, "{out}");
+    let v: serde_json::Value = serde_json::from_str(&out).unwrap();
+    assert_eq!(v["error"]["kind"], "usage");
 }
 
 #[tokio::test]
@@ -153,6 +178,63 @@ async fn config_path_set_show() {
         run(bin(&server.uri(), dir.path()).args(["config", "get", "general.title_language"]));
     assert_eq!(code, 0);
     assert_eq!(out.trim(), "en");
+    // `--json`: one JSON document for `path` and `get` too.
+    let (code, out, _) = run(bin(&server.uri(), dir.path()).args(["config", "path", "--json"]));
+    assert_eq!(code, 0);
+    let v: serde_json::Value = serde_json::from_str(&out).unwrap();
+    assert!(Path::new(v["path"].as_str().unwrap()).starts_with(dir.path()));
+    let (code, out, _) = run(bin(&server.uri(), dir.path()).args([
+        "config",
+        "get",
+        "engine.concurrent_jobs",
+        "--json",
+    ]));
+    assert_eq!(code, 0);
+    assert_eq!(serde_json::from_str::<serde_json::Value>(&out).unwrap(), 5);
+}
+
+#[tokio::test]
+async fn config_path_and_reset_survive_broken_file() {
+    let server = MockServer::start().await;
+    let dir = tempfile::tempdir().unwrap();
+    let (code, out, _) = run(bin(&server.uri(), dir.path()).args(["config", "path"]));
+    assert_eq!(code, 0);
+    let config_file = std::path::PathBuf::from(out.trim());
+    std::fs::create_dir_all(config_file.parent().unwrap()).unwrap();
+    std::fs::write(&config_file, "this is = not [toml").unwrap();
+    let (code, _, err) = run(bin(&server.uri(), dir.path()).args(["config", "show"]));
+    assert_eq!(code, 2, "a broken config.toml is a config error: {err}");
+    let (code, out, err) = run(bin(&server.uri(), dir.path()).args(["config", "path"]));
+    assert_eq!(code, 0, "`config path` needs no parsed settings: {err}");
+    assert_eq!(out.trim(), config_file.to_string_lossy());
+    let (code, _, err) = run(bin(&server.uri(), dir.path()).args(["config", "reset"]));
+    assert_eq!(code, 0, "`config reset` recovers a broken file: {err}");
+    let (code, out, _) = run(bin(&server.uri(), dir.path()).args(["config", "show", "--json"]));
+    assert_eq!(code, 0);
+    let v: serde_json::Value = serde_json::from_str(&out).unwrap();
+    assert!(v["engine"]["concurrent_jobs"].is_number());
+}
+
+#[tokio::test]
+async fn episode_selection_is_validated_early_and_must_match() {
+    let server = MockServer::start().await;
+    mount_site(&server).await;
+    let dir = tempfile::tempdir().unwrap();
+    let (code, _, err) = run(bin(&server.uri(), dir.path()).args(["links", STAR_TREK, "-e", "0"]));
+    assert_eq!(code, 2, "episode 0 is a usage error: {err}");
+    let (code, _, err) = run(bin(&server.uri(), dir.path()).args(["links", STAR_TREK, "-e", "99"]));
+    assert_eq!(code, 2, "{err}");
+    assert!(err.contains("no episodes match"), "{err}");
+    let (code, _, err) =
+        run(bin(&server.uri(), dir.path()).args(["export", STAR_TREK, "-e", "99"]));
+    assert_eq!(code, 2, "{err}");
+    // Malformed `-e` is rejected before any network call: an unreachable site still yields exit 2.
+    let (code, _, err) =
+        run(bin("http://127.0.0.1:9", dir.path()).args(["links", STAR_TREK, "-e", "x-3"]));
+    assert_eq!(code, 2, "{err}");
+    let (code, _, err) =
+        run(bin("http://127.0.0.1:9", dir.path()).args(["export", STAR_TREK, "-e", "1-0"]));
+    assert_eq!(code, 2, "{err}");
 }
 
 #[tokio::test]

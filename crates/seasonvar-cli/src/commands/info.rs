@@ -1,5 +1,5 @@
 //! `seasonvar info <source>` — title, id, translations, seasons (or the whole `Serial` as JSON).
-use seasonvar_core::Source;
+use seasonvar_core::{Source, TranslationKind};
 
 use crate::cli::SourceArgs;
 use crate::context::Ctx;
@@ -37,10 +37,10 @@ pub async fn run(ctx: &Ctx, a: &SourceArgs) -> Result<(), CliError> {
             .map(|p| format!(" {p:.0}%"))
             .unwrap_or_default();
         println!(
-            "  {:>4}  {:<24} {:?}{}",
+            "  {:>4}  {:<24} {}{}",
             t.id,
             t.name,
-            t.kind(),
+            kind_label(t.kind()),
             dim(&share)
         );
     }
@@ -56,4 +56,12 @@ pub async fn run(ctx: &Ctx, a: &SourceArgs) -> Result<(), CliError> {
         }
     }
     Ok(())
+}
+
+fn kind_label(kind: TranslationKind) -> &'static str {
+    match kind {
+        TranslationKind::Dub => "dub",
+        TranslationKind::Subtitles => "subtitles",
+        TranslationKind::Trailers => "trailers",
+    }
 }
