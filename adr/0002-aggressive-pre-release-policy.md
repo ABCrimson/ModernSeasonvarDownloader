@@ -1,6 +1,6 @@
 # ADR-0002 — Aggressive pre-release policy
 
-Date: 2026-08-22 · Status: accepted
+Date: 2026-08-22 · Status: accepted — amended 2026-08-27: the evergreen bump flipped pnpm to `12.0.0` GA (per this policy) and moved the Rust toolchain to `nightly-2026-08-27`, an exception to the RC floor below; current pins live in the manifests and `docs/bom.html` (v4)
 
 ## Decision
 For any chosen package, adopt the next major/minor once it has reached **RC** (or the equivalent: Rust beta channel, React canary channel). Pins are exact (no caret) and recorded in `docs/bom.html`. Builds below RC grade (alpha, dev, nightly, canary-of-a-minor) stay out. Every bet names a stable fallback, and the scaffold gate (first commit must pass install/build/test on all three CI OSes) demotes any bet that fails it.
