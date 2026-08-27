@@ -54,6 +54,10 @@ pub enum Command {
     Export(ExportArgs),
     /// Show or edit config.toml.
     Config(ConfigArgs),
+    /// Download episodes of one translation (resumable; records to the library).
+    Download(DownloadArgs),
+    /// List what has been downloaded (the library).
+    Library(LibraryArgs),
 }
 
 #[derive(Args, Debug, Clone)]
@@ -96,6 +100,52 @@ pub struct ExportArgs {
     /// Prefer Russian titles in file names.
     #[arg(long)]
     pub russian: bool,
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct DownloadArgs {
+    #[command(flatten)]
+    pub playlist: PlaylistArgs,
+    /// Download directory (default: settings general.download_dir).
+    #[arg(long, value_name = "DIR")]
+    pub dir: Option<PathBuf>,
+    /// Naming template (default: settings general.naming_template).
+    #[arg(long, value_name = "TEMPLATE")]
+    pub template: Option<String>,
+    /// Prefer Russian titles in file names.
+    #[arg(long)]
+    pub russian: bool,
+    /// Concurrent jobs (default: settings engine.concurrent_jobs).
+    #[arg(short = 'j', long, value_name = "N")]
+    pub jobs: Option<u32>,
+    /// Segments per job (default: settings engine.segments_per_job).
+    #[arg(long, value_name = "N")]
+    pub segments: Option<u32>,
+    /// Speed limit in KiB/s, 0 = unlimited (default: settings engine.speed_limit_kbps).
+    #[arg(long, value_name = "KIBPS")]
+    pub limit: Option<u64>,
+    /// Re-download even when the file already exists with the right size.
+    #[arg(long)]
+    pub overwrite: bool,
+    /// Do not open the library database (nothing is recorded; no resume across runs).
+    #[arg(long)]
+    pub no_library: bool,
+    /// Share the library with a running desktop app (Turso multiprocess WAL; experimental).
+    #[arg(long)]
+    pub experimental_shared_db: bool,
+    /// Replace the scheme+host of every media URL with this base (tests/mirrors).
+    #[arg(long, hide = true, value_name = "URL")]
+    pub rewrite_cdn: Option<Url>,
+}
+
+#[derive(Args, Debug, Clone)]
+pub struct LibraryArgs {
+    /// Share the library with a running desktop app (experimental).
+    #[arg(long)]
+    pub experimental_shared_db: bool,
+    /// Only this serial id.
+    #[arg(long, value_name = "ID")]
+    pub serial: Option<u32>,
 }
 
 #[derive(Args, Debug, Clone)]

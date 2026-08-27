@@ -1,10 +1,14 @@
 //! Subcommand dispatch: one module per command, `selection` for the shared picker/range helpers.
 pub mod config;
+pub mod download;
 pub mod export;
 pub mod info;
+pub mod library;
 pub mod links;
 pub mod search;
 pub mod selection;
+
+use seasonvar_core::{Store, StoreOptions};
 
 use crate::cli::{Cli, Command, ConfigAction};
 use crate::context::Ctx;
@@ -31,5 +35,18 @@ pub async fn run(cli: Cli) -> Result<(), CliError> {
         Command::Search { query } => search::run(&ctx, &query).await,
         Command::Export(a) => export::run(&ctx, &a).await,
         Command::Config(a) => config::run(&ctx, &a).await,
+        Command::Download(a) => download::run(&ctx, &a).await,
+        Command::Library(a) => library::run(&ctx, &a).await,
     }
+}
+
+/// Open the library (`seasonvar.db` under the data dir). Multiprocess mode when `--experimental-shared-db`
+/// or `storage.experimental_multiprocess` is set; a second single-process opener gets `DbLocked` (exit 5).
+pub async fn open_store(ctx: &Ctx, shared_flag: bool, read_only: bool) -> Result<Store, CliError> {
+    let opts = StoreOptions {
+        experimental_multiprocess: shared_flag || ctx.settings.storage.experimental_multiprocess,
+        read_only,
+        backup: !read_only,
+    };
+    Ok(Store::open(&ctx.paths.db_file, opts).await?)
 }

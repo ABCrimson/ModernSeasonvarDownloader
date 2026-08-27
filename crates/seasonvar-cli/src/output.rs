@@ -11,6 +11,10 @@ pub enum CliError {
     Core(CoreError),
     Usage(String),
     Interrupted,
+    /// The command already reported this error itself (e.g. `download --json` printed its one
+    /// summary document, which carries the per-job errors): the exit code is the inner error's
+    /// (through [`exit_code`]), but [`emit_error`] prints nothing more.
+    Reported(Box<CliError>),
 }
 
 impl From<CoreError> for CliError {
@@ -31,6 +35,7 @@ pub fn exit_code(err: &CliError) -> i32 {
     match err {
         CliError::Usage(_) => 2,
         CliError::Interrupted => 130,
+        CliError::Reported(inner) => exit_code(inner),
         CliError::Core(e) => match e {
             CoreError::InvalidSource(_) | CoreError::Config(_) => 2,
             CoreError::SerialNotFound { .. } | CoreError::EmptyPlaylist { .. } => 3,
@@ -59,6 +64,7 @@ pub fn dto(err: &CliError) -> CoreErrorDto {
             message: "interrupted".into(),
             hint: None,
         },
+        CliError::Reported(inner) => dto(inner),
     }
 }
 
@@ -71,8 +77,12 @@ pub fn print_json<T: Serialize>(value: &T) -> Result<(), CliError> {
     Ok(())
 }
 
-/// JSON mode: envelope on stdout. Human mode: red `error:` + hint on stderr.
+/// JSON mode: envelope on stdout. Human mode: red `error:` + hint on stderr. Nothing for an
+/// error the command has already [`CliError::Reported`].
 pub fn emit_error(err: &CliError, json: bool) {
+    if matches!(err, CliError::Reported(_)) {
+        return;
+    }
     let d = dto(err);
     if json {
         let _ = print_json(&serde_json::json!({ "error": d }));
@@ -102,7 +112,6 @@ pub fn dim(s: &str) -> String {
 }
 
 /// `1536` → `1.5 KiB`; exact bytes below 1 KiB.
-#[allow(dead_code)] // used by `download` / `library` (Task 7)
 pub fn human_bytes(n: u64) -> String {
     const U: [&str; 5] = ["B", "KiB", "MiB", "GiB", "TiB"];
     let mut v = n as f64;
