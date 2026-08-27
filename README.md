@@ -11,7 +11,7 @@ for every pinned version, `adr/` for decisions, `CONTEXT.md` for vocabulary.
 
 ## Develop
 
-- Rust `beta-2026-08-18` (auto-selected by `rust-toolchain.toml`), Node 26, pnpm 12 (`corepack` is not used; `pnpm` self-switches to the pinned version).
+- Rust `nightly-2026-08-27` (auto-selected by `rust-toolchain.toml`), Node 26, pnpm 12 (`corepack` is not used; `pnpm` self-switches to the pinned version).
 - `pnpm install` · `cargo nextest run --workspace --all-features` · `pnpm test` · `pnpm e2e` · `pnpm dev` (desktop app)
 
 ## License

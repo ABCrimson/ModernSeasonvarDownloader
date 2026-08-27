@@ -16,6 +16,11 @@
 //! - [`settings`] — [`Settings`] / [`Paths`]: `config.toml` (paths, defaults, validation, dotted `set`, [`ClientConfig`] bridge).
 //! - [`store`] — [`Store`] / [`StoreOptions`]: the Turso `seasonvar.db` (open/lock/integrity/backup, `user_version` migrations, repositories, [`JobRow`] / [`SegmentRow`] / [`LibraryShow`]).
 //! - [`download`] — [`Manager`] / [`Limits`] / [`Job`] / [`JobState`] / [`Event`]: the download engine (scheduler, segmented resumable workers, shared rate limiter, persisted progress).
+
+// The `Send` auto-trait proof for the nested async call chain in `download` exceeds the default
+// trait-solver recursion depth (rustc 1.100 `recursion_depth_exceeding_limit`, rust-lang/rust#159228).
+#![recursion_limit = "256"]
+
 pub mod client;
 pub mod decode;
 pub mod download;

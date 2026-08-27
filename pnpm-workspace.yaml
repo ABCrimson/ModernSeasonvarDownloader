@@ -13,6 +13,15 @@ minimumReleaseAgeExclude:
   - '@biomejs/cli-win32-arm64@2.5.10'
   - '@biomejs/cli-win32-x64@2.5.10'
   - shadcn@4.19.0
+  - '@tanstack/query-core@5.102.7'
+  - '@tanstack/query-devtools@5.102.7'
+  - '@tanstack/react-query-devtools@5.102.7'
+  - '@tanstack/react-query@5.102.7'
+  - '@types/node@26.4.0'
+  - react-dom@19.3.0-canary-a1124489-20260826
+  - react@19.3.0-canary-a1124489-20260826
+  - scheduler@0.28.0-canary-a1124489-20260826
 peerDependencyRules:
   allowedVersions:
-    'vitest-browser-react>vitest': '5'
+    'vitest-browser-react>vitest': '>=5.0.0-0 <6.0.0'
+    '@vitejs/plugin-react>oxc-transform-react': '0.147.0'
