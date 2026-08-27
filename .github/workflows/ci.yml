@@ -96,8 +96,9 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
-          # pnpm 12 RC reports its store as an extended-length path (\\?\D:\.pnpm-store\v11) on
-          # Windows, which actions/cache rejects as a glob in the post step and fails the job.
+          # pnpm 12 (observed on the 12 RC) reports its store as an extended-length path
+          # (\\?\D:\.pnpm-store\v11) on Windows, which actions/cache rejects as a glob in the
+          # post step and fails the job.
           cache: ${{ runner.os != 'Windows' && 'pnpm' || '' }}
       - run: pnpm install --frozen-lockfile
       - run: pnpm tauri build ${{ matrix.args }}

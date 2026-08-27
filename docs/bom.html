@@ -237,7 +237,7 @@
       <tr><td class="pkg">runners</td><td class="ver">windows-latest · macos-latest · ubuntu-22.04</td><td class="why">macOS runner is Apple Silicon → build <code>universal-apple-darwin</code> (x64 + arm64 in one .dmg). Ubuntu 22.04 = Tauri's recommended glibc floor for AppImage/deb compatibility.</td><td class="alt">ubuntu-24.04</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr><td class="pkg">actions/checkout</td><td class="ver">v7 (v7.0.1)</td><td class="why">—</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr class="changed"><td class="pkg">actions/setup-node</td><td class="ver">v7 (v7.0.0)</td><td class="why"><code>node-version-file: .nvmrc</code> (→ 26), <code>cache: pnpm</code>. M0 gate: the pnpm cache is off on Windows — pnpm 12 RC prints its store as a Windows extended-length path that actions/cache rejects in the post step.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
-      <tr><td class="pkg">pnpm/action-setup</td><td class="ver">v6 (v6.0.10)</td><td class="why">Reads the RC version from <code>packageManager</code>.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
+      <tr><td class="pkg">pnpm/action-setup</td><td class="ver">v6 (v6.0.10)</td><td class="why">Reads the pinned pnpm version from <code>packageManager</code> (RC at v2, GA since v4).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr class="changed"><td class="pkg">dtolnay/rust-toolchain</td><td class="ver">@master<span class="sub">toolchain: nightly-2026-08-27 set explicitly in each workflow</span></td><td class="why">Installs the dated nightly + clippy/rustfmt; adds <code>aarch64/x86_64-apple-darwin</code> targets on macOS. (v2 used <code>@beta</code> with the toolchain resolved from rust-toolchain.toml; v4 pins the channel in the workflow to match the nightly toolchain.)</td><td class="alt">@1.98.0</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v4</span></td></tr>
       <tr><td class="pkg">Swatinem/rust-cache</td><td class="ver">v2 (v2.9.2)</td><td class="why">Cargo registry + target cache keyed per job/OS.</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span></td></tr>
       <tr class="changed"><td class="pkg">taiki-e/install-action</td><td class="ver">v2</td><td class="why">Installs cargo-nextest 0.9.143 and cargo-deny 0.20.2 as prebuilt binaries in CI (no <code>cargo install</code> wait).</td><td class="alt">—</td><td class="st"><span class="tag chosen">chosen</span> <span class="tag v2">v2</span></td></tr>
@@ -287,7 +287,7 @@
 
 <section id="cli">
   <h2><span class="n">D</span>Rust · <code>seasonvar-cli</code></h2>
-  <p class="lede">Binary <code>seasonvar</code>: <code>info</code> · <code>links</code> · <code>search</code> · <code>download</code> · <code>export</code>. Thin over core; what CI exercises end-to-end.</p>
+  <p class="lede">Binary <code>seasonvar</code>: <code>info</code> · <code>links</code> · <code>search</code> · <code>export</code> · <code>config</code> · <code>download</code> · <code>library</code>. Thin over core; what CI exercises end-to-end.</p>
   <div class="card tablewrap"><table>
     <thead><tr><th>Crate</th><th>Version</th><th>Role / why</th><th>On tap</th><th>Status</th></tr></thead>
     <tbody>
@@ -426,7 +426,7 @@
       <tr><td class="pkg">Time</td><td class="ver">jiff</td><td class="alt">chrono</td><td class="why">Modern API, correct zones; young but by a maintainer with a track record (regex, ripgrep). Fallback is one-file.</td></tr>
       <tr><td class="pkg">Typed IPC</td><td class="ver">tauri-specta RC</td><td class="alt">hand-written types + zod</td><td class="why">Eliminates drift between Rust structs and TS; RC status is the accepted risk.</td></tr>
       <tr><td class="pkg">Junk-marker handling</td><td class="ver">markers as data (regex) + recorded fixtures</td><td class="alt">hardcoded triple</td><td class="why">Every existing project hardcodes <code>//b2xvbG8=</code>; a key rotation should be a fixture update, not a rewrite.</td></tr>
-      <tr><td class="pkg">Fonts</td><td class="ver">Geist (self-hosted)</td><td class="alt">Inter variable</td><td class="why">Tentative — the UI design pass owns the final call; both are in the BOM.</td></tr>
+      <tr class="changed"><td class="pkg">Fonts</td><td class="ver">Inter variable (self-hosted via fontsource) <span class="sub">M0 flipped the tentative Geist pick — geist's packaging is Next.js-oriented</span></td><td class="alt">Geist</td><td class="why">Tentative — the UI design pass owns the final call; both are in the BOM.</td></tr>
     </tbody>
   </table></div>
 </section>
