@@ -1,5 +1,6 @@
 {
   "name": "modern-seasonvar-downloader",
+  "license": "MIT",
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@12.0.0",
